@@ -1,0 +1,49 @@
+@startuml
+
+
+
+package App 
+{
+    class Controller
+    {
+        +process(): void
+    }
+
+    note left of Controller
+        The controller decides whether the
+        LED is off or on, depend on button state.
+    end note
+}
+
+package HAL
+{
+    class Button
+    {
+        +getState(): bool
+    }
+
+    note right of Button
+        Provides the button state,
+        derived from I/O.
+    end note
+
+    class LED
+    {
+        +setState(isOn : bool): void
+    }
+
+    note left of LED
+        Provides methods to enable/disable
+        the LED, via I/O.
+    end note
+}
+
+Controller ..> Button : <<uses>>
+Controller ..> LED : <<uses>>
+
+note top of App
+    REQ-1: If the button state is toggled, the LED shall toggle its state.
+end note
+
+
+@enduml

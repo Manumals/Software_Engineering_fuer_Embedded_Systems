@@ -1,0 +1,36 @@
+@startuml
+
+' REQ-1: If the button state is toggled, the LED shall toggle its state.
+
+package HAL {
+    class Button {
+        +init(id: uint8): void
+        +getButtonState(void): bool
+    }
+    note top of Button
+        Register button press
+    end note
+
+    class LED {
+        -ledState: bool
+        +init(id: uint8): void
+        +switchLedState(void): void
+    }
+    note top of LED
+        Toggle LED
+    end note
+}
+
+package APP {
+    class InputHandler {
+        -lastButtonstate: bool
+    }
+    note top of InputHandler
+        Checks button state and toggle LED
+    end note
+}
+
+InputHandler -> Button: <<uses>>
+InputHandler -> LED: <<uses>>
+
+@enduml

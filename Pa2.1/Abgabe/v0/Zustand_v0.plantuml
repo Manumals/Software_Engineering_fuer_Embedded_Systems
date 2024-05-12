@@ -1,0 +1,50 @@
+@startuml
+[*] --> StateInitializeMcu : [PowerSwitch = ON or ResetButton is pressed]
+StateInitializeMcu : entry / Starting the initialization
+StateInitializeMcu : exit / DisplayTeamName on the OledDisplay
+
+StateInitializeMcu --> StateCalibrateLineSensors : [Initialization done]
+StateCalibrateLineSensors : entry / Calibration of the LineSensors
+
+StateReadyToDrive --> StateDisplayCountdown : [StartButton is released]
+StateReadyToDrive --> StateCalibrateLineSensors : [CalibrateButton is released]
+StateSetParameters --> StateReadyToDrive : [The new Paramter is selected]
+StateReadyToDrive : do / DisplayTeamName on the OledDisplay
+
+StateCalibrateLineSensors --> StateReadyToDrive : [Calibration done]
+StateDisplayCountdown: entry / Starts the CountDownfrom 3 to 0 on the OledDisplay
+
+StateDisplayCountdown --> StateDriveToStart : [CountDown is finished]
+
+StateDriveToStart: entry / The DriveMotors are supplied with power 
+StateDriveToStart: do / Follow the GuideLine 
+StateDriveToStart: exit / The Buzzer emits the ShortBeep
+StateDriveToStart: exit / Start the LapTimer
+
+StateDriveToStart --> StateDriveToFinish : [StartFinishLine is recognized]
+StateDriveToFinish : do / Follow the GuideLine 
+
+StateDriveToFinish --> StateDriveOverGap : [The GuideLine is lost]
+StateDriveOverGap  --> StateDriveToFinish : [The GuideLine is recognized]
+StateDriveOverGap : do / The Robot searches for the GuideLine
+
+StateDriveToFinish --> StateDisplayLapTime : [StartFinishLine is recognized again]
+StateDisplayLapTime --> StateCalibrateLineSensors : [CalibrateButton is released]
+StateDisplayLapTime  --> StateReadyToDrive : [The LapTimer has been stopped] 
+StateDisplayLapTime : entry / Stop the power to the DriveMotors
+StateDisplayLapTime : entry / Stop the LapTimer 
+StateDisplayLapTime : exit / Shows the completed lap time on the OledDisplay
+
+StateDisplayLapTime  --> StateSetParameters :[ParamButton is releasd]
+StateReadyToDrive --> StateSetParameters :[ParamButton is releasd]
+StateSetParameters: entry / Cycle to the next parameter set
+StateSetParameters: exit / Display parameter set number
+
+StateDriveToFinish --> StateErrorHandler : [LapTimer > 20s]
+StateDriveToStart --> StateErrorHandler : [DriveToStart is active for more than 10s]
+StateDriveOverGap --> StateErrorHandler : [State DriveOverGap is active for more than 5s]
+StateErrorHandler: entry / Stop the power to the DriveMotors
+StateErrorHandler: entry / Play the AlarmSignal on the Buzzer
+StateErrorHandler: do / Display error message on the OledDisplay
+
+@enduml

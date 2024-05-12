@@ -1,0 +1,237 @@
+@startuml
+
+' REQ-1: If the button state is toggled, the LED shall toggle its state.
+
+package App {
+    class Main {
+        -ParamSetIdx: uint8
+    }
+
+    class ParamSet
+
+    class StateHandler {
+        +process()
+        +setState(AbstractState&)
+    }
+
+    package States {
+    class AbstractState {
+        +init(StateHandler&)
+        +enter()
+        +process()
+        +leave()
+    }
+
+    StateHandler --> AbstractState
+
+    AbstractState <|-- StateInitializeMcu
+    AbstractState <|-- StateCalibrateLineSensors
+    AbstractState <|-- StateReadyToDrive
+    AbstractState <|-- StateDriveToStart
+    AbstractState <|-- StateDriveToFinish
+    AbstractState <|-- StateDriveToFinishAfterGap
+    AbstractState <|-- StateDriveOverGap
+    AbstractState <|-- StateDisplayCountdown
+    AbstractState <|-- StateDisplayLapTime
+    AbstractState <|-- StateErrorHandler
+    AbstractState <|-- StateSetParameters
+    
+    }
+    /'note top of AbstractState
+        This is a struct
+    end note'/
+
+    Main -left-> StateHandler
+}
+
+package Service {
+    class ServiceInit {
+        +init()
+    }
+
+    class OledDisplay {
+        +init()
+        +reset()
+        +beginPaint()
+        +endPaint()
+        +sendBlock()
+    }
+
+    class Buttons {
+        +init()
+        +getState(uint8)
+    }
+
+    class Debug {
+        +DEBUG_INIT()
+        +DEBUG_LOG()
+    }
+
+    class EepromIo {
+        +init()
+        +Seek(uint16)
+        +readByte(): uint8
+        +writeByte(uint8)
+    }
+
+    class LineSensors {
+        +init()
+        +getState(uint8)
+    }
+
+    class DriveMotors {
+        +init()
+        +setDirection(uint8)
+        +setSpeed(uint8)
+    }
+
+    class Buzzer {
+        +init()
+        +shortBeep()
+        +alarmSignal()
+    }
+
+    class Power {
+        +getBatteryLevel(): uint16
+    }
+
+    class Timer {
+        +init()
+        +getTime(): uint32
+    }
+}
+
+ParamSet -down-> EepromIo
+
+StateInitializeMcu -down-> Buttons
+StateInitializeMcu -down-> OledDisplay
+
+StateCalibrateLineSensors -down-> Buttons
+StateCalibrateLineSensors -down-> LineSensors
+
+StateReadyToDrive -down-> DriveMotors
+StateReadyToDrive -down-> LineSensors
+StateReadyToDrive -down-> OledDisplay
+StateReadyToDrive -down-> Timer
+
+StateDriveToStart -down-> DriveMotors
+StateDriveToStart -down-> LineSensors
+StateDriveToStart -down-> OledDisplay
+StateDriveToStart -down-> Timer
+
+StateDriveToFinish -down-> DriveMotors
+StateDriveToFinish -down-> LineSensors
+StateDriveToFinish -down-> OledDisplay
+StateDriveToFinish -down-> Timer
+
+StateDriveToFinishAfterGap -down-> DriveMotors
+StateDriveToFinishAfterGap -down-> LineSensors
+StateDriveToFinishAfterGap -down-> OledDisplay
+StateDriveToFinishAfterGap -down-> Timer
+
+StateDriveOverGap -down-> DriveMotors
+StateDriveOverGap -down-> LineSensors
+StateDriveOverGap -down-> Timer
+
+StateDisplayCountdown -down-> OledDisplay
+StateDisplayCountdown -down-> Timer
+
+StateDisplayLapTime -down-> DriveMotors
+StateDisplayLapTime -down-> OledDisplay
+StateDisplayLapTime -down-> Timer
+
+StateErrorHandler -down-> Buzzer
+StateErrorHandler -down-> DriveMotors
+StateErrorHandler -down-> OledDisplay
+
+StateSetParameters -down-> Buttons
+StateSetParameters -down-> OledDisplay
+
+
+
+
+package Hal {
+    class HalInit {
+        +init()
+    }
+
+    class TickTimer {
+        +init()
+        +enable()
+        +disable()
+        +getTickCount()
+    }
+
+    class Spi {
+        +init()
+        +enable()
+        +disable()
+        +configure()
+        +exchange()
+    }
+
+    class Adc {
+        +init()
+        +disable()
+        +enable()
+        +readChannel()
+    }
+
+    class Cpu {
+        +irqEnable()
+        +sleep()
+        +delay()
+        +setClock()
+        +halt()
+    }
+
+    class Eeprom {
+        +init()
+        +Seek(uint16)
+        +readByte(): uint8
+        +writeByte(uint8)
+    }
+
+    class Gpio {
+        +init()
+        +setPin()
+        +clrPin()
+        +getPin()
+        +setPwm()
+    }
+
+    class Uart {
+        +init()
+        +open()
+        +close()
+        +send()
+        +receive()
+    }
+
+}
+
+ServiceInit -down-> HalInit
+
+OledDisplay -down-> Spi
+OledDisplay -down-> Gpio
+
+Power -down-> Adc
+Power -down-> Cpu
+Power -down-> Gpio
+
+Buttons -down-> Gpio
+
+Debug -down-> Gpio
+Debug -down-> Uart
+
+Timer -down-> TickTimer
+
+EepromIo -down-> Eeprom
+
+LineSensors -down-> Adc
+
+DriveMotors -down-> Gpio
+
+Buzzer -down-> Gpio
+
+@enduml
