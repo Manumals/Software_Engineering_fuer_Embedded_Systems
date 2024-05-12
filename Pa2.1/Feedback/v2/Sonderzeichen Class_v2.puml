@@ -1,0 +1,410 @@
+@startuml Classes
+
+skinparam dpi 100
+skinparam arrowThickness 3
+
+package App {
+    enum StatesEnum {
+        InitializeMcu
+        CalibrateLineSensors
+        ReadyToDrive
+        DriveToStart
+        DriveToFinish
+        DriveOverGap
+        DisplayCountdown
+        DisplayLapTime
+        ErrorHandler
+        SetParameters
+    }
+
+
+    class Main { 
+    }
+
+    class ParamSet {
+        +speed: UInt8
+        +curveRadius: UInt8
+    }
+    note right of ParamSet
+        You don't need to define it already in that detail here.
+        I would suggest to remove.
+    end note
+
+    class ParamSets {
+        -ParamSetIdx: UInt8
+        +nextParamSet(void): void
+        +getParamSet(void): ParamSet
+    }
+
+    ParamSets ..> ParamSet
+
+    class StateHandler {
+        -currentState: StateEnum
+        +process()
+    }
+    note top of StateHandler
+        The main loop repeatedly calls process().
+        The StateHandler checks currentState and
+        decides what the next state will be
+        considering the correct transistion condition
+    end note
+    note top of StateHandler
+        How will the StateHandler be informed of
+        "transition conditions"?
+        Based on what will the StateHandler decide
+        when and where to change states?
+    end note
+
+    StateHandler ..> StatesEnum
+
+    package States {
+
+        StateHandler ..> InitializeMcu
+        StateHandler ..> CalibrateLineSensors
+        StateHandler ..> ReadyToDrive
+        StateHandler ..> DriveToStart
+        StateHandler ..> DriveToFinish
+        StateHandler ..> DriveOverGap
+        StateHandler ..> DisplayCountdown
+        StateHandler ..> DisplayLapTime
+        StateHandler ..> ErrorHandler
+        StateHandler ..> SetParameters
+
+        class InitializeMcu {
+            +initMcu(void): void
+            +displayTeamName(void): void
+        }
+
+        class CalibrateLineSensors {
+            +calibrateLineSensors(void): void
+        }
+
+        class ReadyToDrive {
+            +displayTeamName(void): void
+        }
+
+        class DriveToStart {
+            +startDriving(void): void
+            +followGuideLine(void): void
+            +startLap(void): void
+        }
+        note top of DriveToStart
+            Same function "followGuideLine" is needed
+            in DriveToStart and DriveToFinish.
+
+            Remember DRY (Don't repeat yourself) principle.
+            Do you maybe need another module that handles
+            the followGuideLine algorithm?
+        end note
+
+        class DriveToFinish {
+            +followGuideLine(void): void
+        }
+
+        class DriveOverGap {
+            +findGuideLine(void): void
+        }
+
+        class DisplayCountdown {
+            +startCountDown(void): void
+        }
+
+        class DisplayLapTime {
+            -startTimeMs: UInt32
+            +stopDriving(void): void
+            +showLapTime(void): void
+        }
+        note top of DisplayLapTime
+            DisplayLapTime and ErrorHandler
+            both implement same function
+            "stopDriving".
+
+            Maybe a common function in a Service layer module
+            would be more appropriate which then is called
+            by other functions in DisplayLapTime
+            and ErrorHandler.
+        end note
+
+        class ErrorHandler {
+            +stopDriving(void): void
+            +DisplayError(msg: char*): void
+        }
+
+        class SetParameters {
+            +nextParamSet(void): void
+            +displayParamSetIdx(void): void
+
+        }
+
+    }
+
+    Main .left.> StateHandler
+}
+
+SetParameters ..> ParamSets
+
+class SystemErrorHandler {
+    +HandleError(msg: char*): void    
+}
+note bottom of SystemErrorHandler
+    Handles system errors
+    that do not directly
+    arise from state errors 
+end note
+note top of SystemErrorHandler
+    Why not always use this module instead of
+    additionally having the ErrorHandler module?
+
+    Remember DRY (Don't repeat yourself) and
+    SRP (Single responsibility principle).
+end note
+
+SystemErrorHandler ..> ErrorHandler
+
+package Service {
+    'As far as we know ServiceInit does not need any parameters and doesn't provide a return value
+    class ServiceInit {
+        +init(void): UInt8
+    }
+    note right of ServiceInit
+        This is the init class of the package.
+        It calls every init method of all
+        the other classes in this package
+    end note
+
+    class OledDisplay {
+        +init(void): UInt8
+        +clearScreen(void): void
+        +printText(col: UInt8, row: UInt8, text: char*): void
+        +setBackLight(value: Bool): void
+    }
+
+    class Buttons {
+        +init(void): UInt8
+        +isPressed(buttonNo: UInt8): Bool
+    }
+
+    class LineSensors {
+        -threshold: UInt16
+        +init(void): UInt8
+        +calibrate(void): void
+        +isLineDetected(sensorNo: UInt8): Bool
+    }
+
+    class DriveMotors {
+        +init(void): UInt8
+        +setSpeeds(speedLeft: Int16, 
+        speedRight: Int16): void
+    }
+    note bottom of DriveMotors
+        The different speeds control the
+        two drive motors independently
+        which allows to drive in a
+        specific direction
+    end note
+
+    class Buzzer {
+        +init(void): UInt8
+        +playTone(freq: UInt16, volume: UInt8,
+        durationMs: UInt16): void
+        +shortBeep(void): void
+        +alarmSignal(void): void
+    }
+    note right: Wer benutzt playTone? shortBeep und alarmSignal sind doch alle spezifizierten Töne
+
+    class Timer {
+        -id: UInt8
+        -callback: CallbackFnctn
+        -delayMs: UInt32
+        -repeat: Bool
+        -timeStartMs: UInt32
+        +startTimer(id: UInt8, delayMs: UInt32,
+         callback: CallbackFnctn, repeat: Bool): UInt8
+        +stopTimer(void): Bool
+
+        +getId(void): UInt8
+        +isRunning(void): Boolean
+        +getTimePassed(void): UInt32
+    }
+    note top of Timer
+        CallbackFnctn: void(*)(id: UInt8)
+    end note
+
+    class Timers {
+        -TimerList: ArrayList<Timer>
+        +init(void): UInt8
+        +addTimer(delayMs: UInt32,
+        callback: CallbackFnctn, repeat: Bool): UInt8
+        +deleteTimer(id: UInt8): Bool
+        +isRunning(id: UInt8): Boolean
+    }
+    note right: die Aufteilung zwischen Timers und Timer ist mir nicht ganz klar. wenn addTimer schon delay, callback und repeat definiert hat, warum wird es dann beim starten erneut benötigt? Warum hat startTimer eine id aber StopTimer nicht?
+}
+
+
+Buzzer ..> Timers
+DriveMotors ..> ParamSets
+note on link
+    Service layer modules should not call App layer modules!
+
+    Use the setSpeeds function (or similar) instead and let the
+    current parameterSet be called by other app layer module
+    (which most likely will be using those parameters for their
+    line following algorithm anyway)
+end note
+
+StateHandler .[#Red].> Buttons
+StateHandler .[#MidnightBlue].> LineSensors
+StateHandler .[#DodgerBlue].> Timers
+
+
+
+
+
+
+Main .[#Fuchsia].> ServiceInit
+
+'ParamSets .[#DarkMagenta].> EepromIo
+
+InitializeMcu .[#Red].> Buttons
+InitializeMcu .[#Gold].> OledDisplay
+
+CalibrateLineSensors .[#Red].> Buttons
+note right
+    Warum die Verbindung zu buttons?
+
+    Wer überwacht den Button-Zustand und macht etwas damit?
+    Siehe Zustandsdiagramm.
+end note
+CalibrateLineSensors .[#MidnightBlue].> LineSensors
+
+ReadyToDrive .[#MidnightBlue].> LineSensors
+ReadyToDrive .[#Gold].> OledDisplay
+ReadyToDrive .[#DodgerBlue].> Timers
+note right
+    Warum die Beziehung zu LineSensor und Timer? 
+    Der UseCase enthält nur displayTeamName. 
+    Bitte alle Verbindungen noch einmal auf notwendigkeit 
+    prüfen, hier kann denke ich viel vereinfacht werden.
+
+    Was ist mit Buttons?
+
+
+    Allgemeine Anmerkung:
+    Die notwendigen Module zeigen sich im Zustandsdiagram.
+    Benötigt wird nur das was intern im State notwendig ist
+    und wenn events beim herausgehen (also Button-States)
+    notwendig sind.
+end note
+
+DriveToStart .[#Orange].> Buzzer
+DriveToStart .[#Green].> DriveMotors
+DriveToStart .[#MidnightBlue].> LineSensors
+DriveToStart .[#Gold].> OledDisplay
+DriveToStart .[#DodgerBlue].> Timers
+
+DriveToFinish .[#Green].> DriveMotors
+DriveToFinish .[#MidnightBlue].> LineSensors
+DriveToFinish .[#Gold].> OledDisplay
+DriveToFinish .[#DodgerBlue].> Timers
+
+DriveOverGap .[#Green].> DriveMotors
+DriveOverGap .[#MidnightBlue].> LineSensors
+DriveOverGap .[#DodgerBlue].> Timers
+
+DisplayCountdown .[#Gold].> OledDisplay
+DisplayCountdown .[#DodgerBlue].> Timers
+
+DisplayLapTime .[#Green].> DriveMotors
+DisplayLapTime .[#Gold].> OledDisplay
+DisplayLapTime .[#DodgerBlue].> Timers
+DisplayLapTime .[#Orange].> Buzzer
+
+ErrorHandler .[#Orange].> Buzzer
+ErrorHandler .[#Green].> DriveMotors
+ErrorHandler .[#Gold].> OledDisplay
+
+SetParameters .[#Red].> Buttons
+SetParameters .[#Gold].> OledDisplay
+
+
+
+
+package Hal {
+    'We do not have any information how the provided HalInit will work and imagine that there are no parameters needed and there is no return value given
+    class HalInit {
+        +init(void): UInt8
+    }
+    note right of HalInit
+        This is the init class of the package.
+        It calls every init method of all
+        the other classes in this package
+    end note
+
+    class Gpio {
+        +init(void): UInt8
+        +setDigital(pinNo: UInt8, state: Bool)
+        +getDigital(pinNo: UInt8): Bool
+        +getAnalog(pinNo: UInt8): UInt16
+    }
+
+    class Pwm {
+        +init(void): UInt8
+        +enable(pinNo: UInt8): void
+        +disable(pinNo: UInt8): void
+        +setPwm(pinNo: UInt8, duty: UInt8)
+    }
+    note right of Pwm::"setPwm"
+        duty cycle ranges from 0 (0%) to 255 (100%)
+    end note
+
+    class TickTimer {
+        +init(void): UInt8
+        +getTickCount(void): UInt32
+    }
+
+}
+
+/'
+used colors
+    [#Red]
+    [#Orange]
+    [#Gold]
+    [#Green]
+    [#DodgerBlue]
+    [#MidnightBlue]
+    [#DarkMagenta]
+    [#Fuchsia]
+'/
+
+SystemErrorHandler .[#Gray].> Gpio
+
+ServiceInit .[#Fuchsia].> HalInit
+
+OledDisplay .[#Gold].> Gpio
+
+Buttons .[#Red].> Gpio
+
+Timers .[#DodgerBlue].> TickTimer
+
+LineSensors .[#MidnightBlue].> Gpio
+
+DriveMotors .[#Green].> Pwm
+
+Buzzer .[#Orange].> Pwm
+
+
+
+note as N1
+    As long as not declared
+    otherwise each arrow shows
+    a <<uses>> relationship
+end note
+
+
+
+Main ..> SystemErrorHandler
+ServiceInit ..> SystemErrorHandler
+HalInit ..> SystemErrorHandler
+
+@enduml

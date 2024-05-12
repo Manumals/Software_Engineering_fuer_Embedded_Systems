@@ -1,0 +1,78 @@
+@startuml
+
+[*] --> StateInitializeMcu : MCU was switched on or reset \n [PowerSwitch = ON or Reset Button is pressed]
+StateInitializeMcu : entry / Starting the initialization
+StateInitializeMcu : exit / DisplayTeamName on the OledDisplay
+
+note left of StateInitializeMcu
+    The team name will be shown on the display all the time. 
+    Thus, the team name will be displayed more than 2 seconds 
+    before the start (count down of at least 3 seconds).
+end note
+
+StateInitializeMcu --> StateCalibrateLineSensors : Initialization done
+'StateCalibrateLineSensors : entry / Calibration of the LineSensors
+
+StateReadyToDrive --> StateDisplayCountdown : StartButton is released
+StateReadyToDrive --> StateCalibrateLineSensors : CalibrateButton is released
+StateSetParameters --> StateReadyToDrive : The new Paramter is selected
+StateReadyToDrive : entry / DisplayTeamName on the OledDisplay
+
+StateCalibrateLineSensors --> StateReadyToDrive : Calibration done
+StateDisplayCountdown: entry / Starts the Countdown from 3 to 0 on the OledDisplay
+
+StateDisplayCountdown --> StateDriveToStart : CountDown is finished
+
+StateDriveToStart: entry / The DriveMotors are supplied with power 
+StateDriveToStart: do / Follow the GuideLine 
+StateDriveToStart: exit / The Buzzer emits the ShortBeep
+StateDriveToStart: exit / Start the LapTimer
+note right of StateDriveToStart
+    It is assumed that no gaps occur in this 
+    state, as the robot is set up only a few 
+    centimeters from the start 
+    (at least 3 cm from the start)
+end note
+note right of StateDriveToStart
+    Aber was ist wenn das doch passieren sollte?
+    
+    Eine saubere Lösung wäre hier stattdessen
+    in den Fehlerzustand überzugehen.
+
+    Fehlt hier eventuell noch ein Requirement?
+end note
+
+StateDriveToStart --> StateDriveToFinish : StartFinishLine is recognized
+StateDriveToFinish : do / Follow the GuideLine 
+
+StateDriveToFinish --> StateDriveOverGap : The GuideLine is lost
+StateDriveOverGap  --> StateDriveToFinish : The GuideLine is recognized
+StateDriveOverGap : do / The Robot searches for the GuideLine
+
+StateDriveToFinish --> StateDisplayLapTime : StartFinishLine is recognized
+StateDisplayLapTime  --> StateReadyToDrive : Displayed lap time
+StateDisplayLapTime : entry / Stop the power to the DriveMotors
+StateDisplayLapTime : entry / Stop the LapTimer 
+StateDisplayLapTime : exit / Shows the completed lap time on the OledDisplay
+note right of StateDisplayLapTime 
+ wann ist "Displayed lap time" true? Wie kann die Exit Aktion das Anzeigen sein wenn zum Verlassen die Zeit bereits angezeigt sein muss?
+end note
+
+StateReadyToDrive --> StateSetParameters :ParamButton is released
+StateSetParameters: entry / Cycle to the next parameter set
+StateSetParameters: exit / Display parameter set number
+note right of StateSetParameters
+ Parameter werden bei Exit angezeigt und der Teamname bei Entry im Folgezustand. Überschreibt der TeamName das ParameterSet? Wird beides angezeigt für immer?
+ Parameter selection wird im UseCase nicht erwähnt, ist aber transition aus dem state. Wann ist die Bedingung true?
+end note
+StateDriveToFinish --> StateErrorHandler : LapTimer > 20s
+StateDriveToStart --> StateErrorHandler : DriveToStart is active for more than 10s 
+StateDriveOverGap --> StateErrorHandler : State DriveOverGap is active for more than 5s
+StateErrorHandler: entry / Stop the power to the DriveMotors
+StateErrorHandler: entry / Play the AlarmSignal on the Buzzer
+StateErrorHandler: do / Display error message on the OledDisplay
+note right of StateErrorHandler
+ wann werden die Timer für StartLinie nicht finden und Gap gestartet?
+end note
+
+@enduml
