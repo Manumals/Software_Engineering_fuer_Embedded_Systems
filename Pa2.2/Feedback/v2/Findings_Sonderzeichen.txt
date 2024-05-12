@@ -1,0 +1,72 @@
+Sonderzeichen:
+	
+	General:
+		wrong includes in header.
+			-> header should only include files if it need them for the declaration (most likely types like EventEnum)
+		LineRecognitionModule missing
+		extern keyword only on declaration not on definition
+		only describe declaration
+		wrong use of parameter/return comment -> only comment existing parameters and return values not void
+
+	DriveToStart:
+		States should not need knowledge of other states
+			DriveToStart_GoToDriveToFinish
+			
+	SetParameter:
+		static ParamSet gParamSetArray[]; does need a size
+		missing definition of static functions
+		declaration of static functions where definition should be
+		Param Set should be defined under types in header
+		
+	DisplayCountdown:
+		Description to specific. Application layer does not need to specify the display type. What if hardware changes to LCD display?
+	
+	CalibrateLineSensors:
+		Calibration can not be done with 1 entry to the function
+		
+	EventEnum:
+		typedef used wrong
+		EventEnum / EventsEnum
+		wrong indentation
+        Missing doxygen documentation
+		
+	DriveHandler:
+		external functions missing ModuleName
+		
+StateDiagram:
+
+	SetParameters:
+		Still no new requirements that allow permanent display of ParameterSet.
+		
+	DriveToStart:
+		Still obsolete transition event "Guideline lost" to error -> State specifies no gaps occure
+		
+ClassDiagram:
+	
+	General:
+		why were the "speaking" names removed in favor of generic entry/do/exit functions that hide the actual functionality?
+	SetParameters
+		getCurrentParameterSet should not be part of this state since it has to be called when the state is not active
+		
+	DriveToStart:
+		States should not need knowledge of other states
+			DriveToStart_GoToDriveToFinish
+	
+	LineRecognition:
+		no connection to lineSensor
+        Also sounds like it would duplicate the functionality of lineSensor.
+		
+	DriveHandler:
+		why the connection to EventEnum?
+		why no connection to lineSensor? why do all drive states still have the connection to LineSensor?
+		
+	InitializeMcu:
+		missing display connection
+		
+	ErrorHandlerState:
+		missing connection to motors and ErrorHandler
+		
+	
+	
+	
+		
