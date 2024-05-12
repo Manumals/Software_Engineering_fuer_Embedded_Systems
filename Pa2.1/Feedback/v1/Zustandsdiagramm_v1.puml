@@ -1,0 +1,102 @@
+@startuml
+
+[*] --> StateInitializeMcu : [PowerSwitch = ON or ResetButton is pressed]
+StateInitializeMcu : entry / Starting the initialization
+StateInitializeMcu : exit / DisplayTeamName on the OledDisplay
+
+note left of StateInitializeMcu
+    What about display team name for min 2 seconds.
+    Could be used as transition event to exit Init state
+    -> would require move DisplayTeamName to entry
+end note
+
+StateInitializeMcu --> StateCalibrateLineSensors : [Initialization done]
+StateCalibrateLineSensors : entry / Calibration of the LineSensors
+
+note right of StateCalibrateLineSensors
+    Bereits eindeutig was der State macht von Namen.
+    Zusätzlich: 
+    Entry: sind die Aktionen die einmalig am Anfang ausgeführt 
+        werden (In der Regel einfacher Funktionsaufruf wie Initialisierungen o.ä.)
+    Do: Beschreibt (wenn nicht eindeutig vom State namen) die Hauptaufgabe vom State
+    Exit: Einmalige Aktion die beim verlassen des Zustands ausgeführt wird
+        (z. B. Algorithmus stoppen o. ä.)
+
+    Hier wäre dann also Do: Calibration of the LineSensors (oder einfach weglassen)
+end note
+
+note on link
+    Transitions werden nach folgendem Schema benannt:
+    Ereignis [Bedingung] /Aktion
+    Für mehr Infos siehe:
+    https://www.sparxsystems.de/ressourcen/literatur/leseprobe-zu-projektabwicklung-mit-uml-und-enterprise-architect/zustandsdiagramm-state-machine-diagram
+end note
+
+StateReadyToDrive --> StateDisplayCountdown : [StartButton is released]
+StateReadyToDrive --> StateCalibrateLineSensors : [CalibrateButton is released]
+StateSetParameters --> StateReadyToDrive : [The new Paramter is selected]
+StateReadyToDrive : do / DisplayTeamName on the OledDisplay
+note right of StateReadyToDrive
+    So würde ich davon ausgehen das jede Main-Loop der TeamName neu geschrieben wird
+    Wenn sie das in Entry setzen dann haben sie den Teamnamen auch immer dargestellt.
+    do wäre ja dann im Prinzip eher ein "check button inputs" o. ä.
+end note
+
+StateCalibrateLineSensors --> StateReadyToDrive : [Calibration done]
+StateDisplayCountdown: entry / Starts the CountDownfrom 3 to 0 on the OledDisplay
+note right of StateDisplayCountdown: typo
+
+StateDisplayCountdown --> StateDriveToStart : [CountDown is finished]
+
+StateDriveToStart: entry / The DriveMotors are supplied with power 
+StateDriveToStart: do / Follow the GuideLine 
+StateDriveToStart: exit / The Buzzer emits the ShortBeep
+StateDriveToStart: exit / Start the LapTimer
+note right of StateDriveToStart
+    Wie wird mit Gaps vor StartFinishLine umgegangen?
+end note
+
+StateDriveToStart --> StateDriveToFinish : [StartFinishLine is recognized]
+StateDriveToFinish : do / Follow the GuideLine 
+
+StateDriveToFinish --> StateDriveOverGap : [The GuideLine is lost]
+StateDriveOverGap  --> StateDriveToFinish : [The GuideLine is recognized]
+StateDriveOverGap : do / The Robot searches for the GuideLine
+
+StateDriveToFinish --> StateDisplayLapTime : [StartFinishLine is recognized again]
+note on link
+    "again" ist überflüssig. Das klare Verhalten ist schon definiert durch den
+    Zustand in dem Sie sich befinden und Übergang.
+end note
+StateDisplayLapTime --> StateCalibrateLineSensors : [CalibrateButton is released]
+StateDisplayLapTime  --> StateReadyToDrive : [The LapTimer has been stopped]
+note on link
+    Besseres Ereignis wäre vielleicht "Displayed lap time"
+end note 
+StateDisplayLapTime : entry / Stop the power to the DriveMotors
+StateDisplayLapTime : entry / Stop the LapTimer 
+StateDisplayLapTime : exit / Shows the completed lap time on the OledDisplay
+
+StateDisplayLapTime  --> StateSetParameters :[ParamButton is releasd]
+note on link
+    typo
+    So wie ich das verstehe gehen wir doch automatisch direkt wieder in 
+    StateReadyToDrive
+end note
+StateReadyToDrive --> StateSetParameters :[ParamButton is releasd]
+note on link: typo
+StateSetParameters: entry / Cycle to the next parameter set
+StateSetParameters: exit / Display parameter set number
+
+StateDriveToFinish --> StateErrorHandler : [LapTimer > 20s]
+StateDriveToStart --> StateErrorHandler : [DriveToStart is active for more than 10s]
+StateDriveOverGap --> StateErrorHandler : [State DriveOverGap is active for more than 5s]
+StateErrorHandler: entry / Stop the power to the DriveMotors
+StateErrorHandler: entry / Play the AlarmSignal on the Buzzer
+StateErrorHandler: do / Display error message on the OledDisplay
+note right of StateErrorHandler
+    Error "killt" das System und man muss das System neustarten.
+    Für uns ist das okay, ich möchte nur sicher gehen dass das eine bewusste Entscheidung ist.
+end note
+
+@enduml

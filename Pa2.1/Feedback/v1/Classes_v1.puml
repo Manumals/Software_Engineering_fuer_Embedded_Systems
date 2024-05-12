@@ -1,0 +1,454 @@
+@startuml
+
+skinparam dpi 200
+
+package App {
+    class Main {
+        -ParamSetIdx: uint8
+    }
+    note top of Main
+        How will this information get here?
+    end note
+
+    class ParamSet
+
+    class StateHandler {
+        +process()
+        +setState(AbstractState&)
+    }
+    note top of StateHandler
+        So the main will call the StateHandler and store the current state
+        and decide which will be the next needed state?
+        How will the main know what event has occured?
+        How will the main know whats the correct transition?
+        ...
+    
+        Think about the Single Responsibility Principle (SRP) and 
+        data encapsulation for your stateHandler to have all related
+        logic collected in one module.
+    
+        What should be the exact purpose of your StateHandler?
+        What functions do you need to inform the StateHandler about whats happening?
+        What functions are really needed to be provided to other modules?
+    end note
+
+    package States {
+
+        StateHandler ---> StateInitializeMcu
+        note on link: Please use correct arrow type: ..>
+        StateHandler ---> StateCalibrateLineSensors
+        StateHandler ---> StateReadyToDrive
+        StateHandler ---> StateDriveToStart
+        StateHandler ---> StateDriveToFinish
+        StateHandler ---> StateDriveOverGap
+        StateHandler ---> StateDisplayCountdown
+        StateHandler ---> StateDisplayLapTime
+        StateHandler ---> StateErrorHandler
+        StateHandler ---> StateSetParameters
+
+        class StateInitializeMcu {
+            +enter()
+            +process()
+            +leave()
+        }
+
+        class StateCalibrateLineSensors {
+            +enter()
+            +process()
+            +leave()
+        }
+        note top of StateCalibrateLineSensors
+            Were do you store the calibration offsetValues?
+            Maybe think about a (already existing) module that
+            can be enhanced which generalizes behavior of Hardware
+            that is connected to this.
+        end note
+
+        class StateReadyToDrive {
+            +enter()
+            +process()
+            +leave()
+        }
+
+        class StateDriveToStart {
+            +enter()
+            +process()
+            +leave()
+        }
+
+        class StateDriveToFinish {
+            +enter()
+            +process()
+            +leave()
+        }
+
+        class StateDriveToFinishAfterGap {
+            +enter()
+            +process()
+            +leave()
+        }
+
+        class StateDriveOverGap {
+            +enter()
+            +process()
+            +leave()
+        }
+
+        class StateDisplayCountdown {
+            +enter()
+            +process()
+            +leave()
+        }
+
+        class StateDisplayLapTime {
+            +enter()
+            +process()
+            +leave()
+        }
+        note top of StateDisplayLapTime
+            How can StateDisplayLapTime display lap time
+            if Timer only returns current time?
+            What does getTime return?
+            (see comments for Timer)
+        end note
+
+        class StateErrorHandler {
+            +enter()
+            +process()
+            +leave()
+        }
+        note top of StateErrorHandler
+            How will you provide the error reason?
+            (errorCodes documented in Code sufficient)
+
+            See also comment on Service-Layer.
+        end note
+
+        class StateSetParameters {
+            +enter()
+            +process()
+            +leave()
+        }
+        note top of StateSetParameters
+            How will the parameters set be accessed?
+            By whom have they be accessed?
+            
+            Start thinking about what sort of parameters
+            you might require, who needs access to them and
+            how to provide them.
+        end note
+
+    }
+    note top of States
+        This is regarding all states listed.
+        Not every state has enter, process, leave
+        function.
+        Please change for more meaningful function names
+        and only provide enter, process, leave if necessary.
+
+        "States" listed here are inconsitent with state diagram.
+
+        For modules aren't really states. What you implement in
+        the modules will be the "handling of a state". Think about
+        adapting the names accordingly.
+    end note
+    /'note top of AbstractState
+        This is a struct
+    end note'/
+
+    Main -left-> StateHandler
+}
+
+package Service {
+    class ServiceInit {
+        +init()
+    }
+    note bottom of ServiceInit
+        Missing parameters and return values.
+    end note
+
+    class OledDisplay {
+        +init()
+        +reset()
+        +beginPaint()
+        +endPaint()
+        +sendBlock()
+    }
+    note bottom of OledDisplay
+        Think about more exact functions. 
+        - What would be your parameters?
+        - What do you want to display / write?
+        - Where do you want to write?
+        - (naming) What do you reset?
+    end note
+
+    class Buttons {
+        +init()
+        +getState(uint8)
+    }
+    note bottom of Buttons
+        Please see provided CodingStyle Guide for
+        type of parameters. 
+        Provided in Aufgabe 2.1/Beistellung
+
+        What is the parameter of getState and will there be returned something?
+        (You have multiple buttons where the state needs to be checked)
+    end note
+
+    class EepromIo {
+        +init()
+        +Seek(uint16)
+        +readByte(): uint8
+        +writeByte(uint8)
+    }
+    note bottom of EepromIo
+        See comment in Hal
+    end note
+
+    class LineSensors {
+        +init()
+        +getState(uint8)
+    }
+    note bottom of LineSensors
+        What is meant by getState?
+        
+        Are there further functions regarding the LineSensor
+        which might make sense to collect here?
+    end note
+
+    class DriveMotors {
+        +init()
+        +setDirection(uint8)
+        +setSpeed(uint8)
+    }
+    note bottom of DriveMotors
+        You have two motors (left and right).
+        How will the individual motors be controlled?
+        Is this part of setDirection and setSpeed?
+        Is setDirection meant as "Forward", "Left", "Right"
+        provided in degrees?
+
+        Alternativly
+        Could you combine your existing functions and extend them
+        to get a drive function or similar? 
+        (by operating motors individually -> but remember DRY (see lecture))
+    end note
+
+    class Buzzer {
+        +init()
+        +shortBeep()
+        +alarmSignal()
+    }
+    note bottom of Buzzer
+        Missing parameters and return values.
+    end note
+
+    class Timer {
+        +init()
+        +getTime(): uint32
+    }
+    note bottom of Timer
+        Currently function of Timer looks to me like simply forwarding
+        time to APP layer.
+        How do you want to implement timers? In every App module individually?
+        Remember DRY and SRP (see lecture)
+
+        Maybe you could think about using the Timer as actual timers.
+        (setting Timers, register callbacks to be called when elapsed,
+        get current state, stop Timer,..)
+
+        Will there be more then one Timer be required?
+    end note
+
+    class ErrorHandler {
+        +raiseError()
+    }
+    note bottom of ErrorHandler
+        What will this be used for?
+
+        StateErrorHandler already has the correct connections to
+        Buzzer, OledDisplay, DriveMotors.
+
+        My comment regarding making the
+        errorHandler universally accessible was pointing
+        toward extracting it from the "classical" layer-pattern and making 
+        it accessible from all layers.
+    end note
+}
+
+
+
+
+StateDriveToStart --[#Gray,bold]-> ErrorHandler
+StateDriveToFinish --[#Gray,bold]-> ErrorHandler
+StateDriveOverGap --[#Gray,bold]-> ErrorHandler
+StateErrorHandler --[#Gray,bold]-> ErrorHandler
+
+
+
+
+Main --[#Fuchsia,bold]-> ServiceInit
+
+ParamSet --[#DarkMagenta,bold]-> EepromIo
+
+StateInitializeMcu --[#Red,bold]-> Buttons
+StateInitializeMcu --[#Gold,bold]-> OledDisplay
+
+StateCalibrateLineSensors --[#Red,bold]-> Buttons
+StateCalibrateLineSensors --[#MidnightBlue,bold]-> LineSensors
+
+StateReadyToDrive --[#Green,bold]-> DriveMotors
+StateReadyToDrive --[#MidnightBlue,bold]-> LineSensors
+StateReadyToDrive --[#Gold,bold]-> OledDisplay
+StateReadyToDrive --[#DodgerBlue,bold]-> Timer
+
+StateDriveToStart --[#Orange,bold]-> Buzzer
+StateDriveToStart --[#Green,bold]-> DriveMotors
+StateDriveToStart --[#MidnightBlue,bold]-> LineSensors
+StateDriveToStart --[#Gold,bold]-> OledDisplay
+StateDriveToStart --[#DodgerBlue,bold]-> Timer
+
+StateDriveToFinish --[#Green,bold]-> DriveMotors
+StateDriveToFinish --[#MidnightBlue,bold]-> LineSensors
+StateDriveToFinish --[#Gold,bold]-> OledDisplay
+StateDriveToFinish --[#DodgerBlue,bold]-> Timer
+
+StateDriveOverGap --[#Green,bold]-> DriveMotors
+StateDriveOverGap --[#MidnightBlue,bold]-> LineSensors
+StateDriveOverGap --[#DodgerBlue,bold]-> Timer
+
+StateDisplayCountdown --[#Gold,bold]-> OledDisplay
+StateDisplayCountdown --[#DodgerBlue,bold]-> Timer
+
+StateDisplayLapTime --[#Green,bold]-> DriveMotors
+StateDisplayLapTime --[#Gold,bold]-> OledDisplay
+StateDisplayLapTime --[#DodgerBlue,bold]-> Timer
+StateDisplayLapTime --[#Orange,bold]-> Buzzer
+
+StateErrorHandler --[#Orange,bold]-> Buzzer
+StateErrorHandler --[#Green,bold]-> DriveMotors
+StateErrorHandler --[#Gold,bold]-> OledDisplay
+
+StateSetParameters --[#Red,bold]-> Buttons
+StateSetParameters --[#Gold,bold]-> OledDisplay
+
+
+
+
+package Hal {
+    class HalInit {
+        +init()
+    }
+    note bottom of HalInit
+        Missing parameters and return values.
+    end note
+
+    class TickTimer {
+        +init()
+        +enable()
+        +disable()
+        +getTickCount()
+    }
+    note bottom of TickTimer
+        Missing parameters and return values.
+    end note
+    note right of TickTimer::"enable()"
+        Normally ticks can't be / it's not necessary to
+        enable or disable the tick count. Ticks will
+        always be counted.
+    end note
+
+    class Spi {
+        +init()
+        +enable()
+        +disable()
+        +configure()
+        +exchange()
+    }
+    note bottom of Spi
+        To use the display use of GPIOs is sufficient.
+    end note
+
+    class Adc {
+        +init()
+        +disable()
+        +enable()
+        +readChannel()
+    }
+    note bottom of Adc
+        LineSensor values can be read with GPIO. No need for Adc.
+    end note
+
+    class Cpu {
+        +irqEnable()
+        +sleep()
+        +delay()
+        +setClock()
+        +halt()
+    }
+    note bottom of Cpu
+        Not linked to anything so not used currently
+        Is this necessary?
+    end note
+
+    class Eeprom {
+        +init()
+        +Seek(uint16)
+        +readByte(): uint8
+        +writeByte(uint8)
+    }
+    note bottom of Eeprom
+        Not necessary. Current Parameterset can be stored in RAM
+        in module implementing StateSetParameters.
+    end note
+
+    class Gpio {
+        +init()
+        +setPin()
+        +clrPin()
+        +getPin()
+        +setPwm()
+    }
+    note bottom of Gpio
+        Missing parameters and return values.
+    end note
+    note right of Gpio::"setPwm()"
+        consider own module for PWM
+    end note
+
+}
+
+ErrorHandler .-[#Gray,bold]-> Gpio
+
+ServiceInit .-[#Fuchsia,bold]-> HalInit
+
+OledDisplay .-[#Gold,bold]-> Spi
+OledDisplay .-[#Gold,bold]-> Gpio
+
+Buttons .-[#Red,bold]-> Gpio
+
+Timer .-[#DodgerBlue,bold]-> TickTimer
+
+EepromIo .-[#DarkMagenta,bold]-> Eeprom
+
+LineSensors .-[#MidnightBlue,bold]-> Adc
+
+DriveMotors .-[#Green,bold]-> Gpio
+
+Buzzer .-[#Orange,bold]-> Gpio
+
+
+
+note as N1
+    The init class of a package
+    calls every init method of
+    all the classes in this package
+end note
+
+note as N2
+    As long as not declared
+    otherwise each arrow shows
+    a <<uses>> relationship
+end note
+
+@enduml
