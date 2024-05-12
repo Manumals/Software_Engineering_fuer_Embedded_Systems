@@ -1,0 +1,32 @@
+Hallo Herr Ott,
+
+ 
+
+hier erstmal allgemeines Feedback:
+
+    Bitte beachten Sie den CodingStyleGuide!
+        Funktionsnamenskonvention von externen Funktionen beachten
+        Achten Sie auf korrekte Doxygen Dokumentation bspw. @return EventEnum ist nicht ausreichend. Hier muss explizit gelistet sein welches event (und wenn mehrere wann welches)
+        Fehlende params und return Werte in Doxygn Beschreibungen (achten Sie auch auf das in und out Keyword für Parameter)
+    Die Projektstruktur muss bereits jetzt vorbereitet und abgebildet werden, auch wenn Sie für HAL, Service und OS keine Module anlegen müssen. Siehe auch Vorlesungsfolien
+    Viele CopyPaste Fehler und typos (sowohl in Diagrammen als auch in C und H files)
+    Funktionsbeschreibungen sollten immer bei den Deklarationen erfolgen nicht bei der Definition (Dies werden wir noch im CodingStyleGuide ergänzen. Es gibt also für diese Abgabe keine Konsequenzen wenn dies nicht erfüllt ist. Sie ersparen sich natürlich die Arbeit des hin- und herkopierens wenn sie es jetzt schon umsetzen)
+    Beschreibungen sollten im aktiv gehalten werden. „Stop motors“ statt „Stops motors”
+    Beschreibungen sollten etwas detaillierter ausfallen
+        Bsp.: findGuideLine -> drive straight forward until a line is recognized
+
+ 
+
+Detaillierteres Feedback zu ihrem Klassendiagramm finden Sie als Kommentar in der PUML Datei im Anhang.
+
+ 
+
+ 
+
+Mit besten Grüßen
+
+ 
+
+i. A. Martin Dembinsky
+
+Software Engineer

@@ -1,0 +1,381 @@
+@startuml class_diagram
+
+package "Provision" {
+package "OS" #DDDDDD {
+    class Scheduler {
+        + Scheduler_init(void) : SchedulerRet
+        + Scheduler_execute(void) : void
+        + Scheduler_addTask(Task*) : Scheduler_Ret
+        + Scheduler_removeTask(Task*) : Scheduler_Ret
+    }
+
+    class Task {
+        + Task_init(Task*, TaskWorkCallback, TaskState, void*) : Task_Ret
+    }
+
+    class SoftTimer{
+        + SoftTimer_init(SoftTimer*) : void
+        + SoftTimer_start(SoftTimer*, UInt16) : SoftTimer_Ret
+        + SoftTimer_Stop(SoftTImer*) : SoftTimer_Ret
+        + SoftTimer_Update(SoftTimer*) : void
+        + SoftTimer_restart(SoftTimer*) : SoftTimer_Ret
+        + SoftTimer_get(SoftTimer*) : UInt16
+        + SoftTimerHandler_init(void) : void
+        + SoftTimerHandler_register(SoftTimer*) : SoftTimer_Ret
+        + SoftTimerHandler_unRegister(SoftTimer*) : SoftTimer_Ret
+        + SoftTimerHandler_update(void) : void
+        + SoftTimer_getTimeStampMs(void) : UInt64
+    }
+
+    class ErrorHandler {
+        + ErrorHandler_show(ErrorHandlerErrorCode) : void
+        + ErrorHandler_halt(ErrorHandlerErrorCode) : void
+        + ErrorHandler_setErrorCallback(ErrorCallback) : void
+        + ErrorHandler_setPrintCallback(PrintCallback) : void
+    }
+
+
+    Scheduler -[hidden]-> ErrorHandler
+    ErrorHandler -[hidden]-> SoftTimer
+
+}
+package "Service" #DDDDDD {
+    class Button {
+        + Button_init(void) : void
+        + Button_getState(ButtonID) : ButtonState
+    }
+
+    class Buzzer {
+        + Buzzer_init(void) : void
+        + Buzzer_beep(BuzzerID) : void
+    }
+
+    class Display {
+        + Display_init(void) : void
+        + Display_clear(void) : void
+        + Display_clearLine(void) : void
+        + Display_home(void) : void
+        + Display_gotoxy(UInt8, UInt8) : void
+        + Display_write(char*, UInt8) : void
+        + Display_writeBar(UInt8) : void
+    }
+
+    class LED {
+        + Led_init(void) : void
+        + Led_switchOn(Led_Led) : void
+        + Led_switchOff(Led_Led) : void
+    }
+
+    class DriveControl {
+        + DriveControl_init(void) : void
+        + DriveControl_drive(DriveControlMotorID, UInt8, DriveControl_Direction) : void
+        + DriveControl_getMileage(void) : Int32
+        + DriveControl_resetMileage(void) : void
+    }
+
+    class LineSensor {
+        + LineSensor_init(void) : void
+        + LineSensor_startCalibration(void) : void
+        + LineSensor_stopCalibration(void) : void
+        + LineSensor_getCalibrationState(void) : bool
+        + LineSensor_read(LineSensorValues*) : void
+        + LineSensor_enableEmitter(void)
+        + LineSensor_disableEmitter(void) : void
+    }
+}
+
+package "HAL" #DDDDDD {
+
+    class GPIO{
+        + Gpio_init(void) : Gpio_Ret
+        + Gpio_write(Gpio_ID, Gpio_State) : Gpio_Ret
+        + Gpio_read(Gpio_ID, Gpio_State* : Gpio_Ret
+        + Gpio_alloc(Gpio_ID, UInt8*) : Gpio_Ret
+        + Gpio_free(Gpio_ID, UInt8) : Gpio_Ret
+    }
+    class PWM{
+        + Pwm_init(void) : void
+        + Pwm_setDutyCycle(PwmID, UInt8) : void
+    }
+    class TickTimer{
+        + TickTimer_init(void) : void
+        + TickTimer_setCallback(TimerTickCallback) : void
+        + TickTimer_get(void) : UInt64
+        + TickTimer_delay(UInt8) : void
+    }
+    class IRQ{
+        + Irq_init(void) : void
+        + Irq_enable(IrqID) : void
+        + Irq_disable(IrqID) : void
+        + Irq_setCallback(IrqID, IrqCallback) : void
+    }
+}
+    class main {
+
+    }
+    main ..> Scheduler
+
+}
+
+package "Application"  {
+
+    class "MainTask" {
+        + MainTask_init(void) : MainTask_Ret
+    }
+
+    Scheduler <.up.. MainTask : register
+
+    enum EventsEnum {
+        InitializationDone
+        CalibrationDone
+        StartButtonIsReleased
+        CoutnDownIsFinished
+        StartFinishLineisRecognized
+        TheGuidLineIsRecognized
+        LapTimeIsTooLong
+        GuideLineIsLost
+        DriveOverGapIsActiveForTooLong
+        ParamButtonisReleased
+        PowerToMotorsIsStopped
+    }
+    note left of EventsEnum
+        multiple typos, please check enums again
+
+        CalibrationButtonIsReleased missing
+
+        Which event is returned when you stay 
+        in the same state?
+    end note
+
+    class DriveHandler {
+        +stopDriving(void):void
+        +findGuideLine(void):void
+        +followGuideLine(UInt8: timerID): void
+    }
+    note left of DriveHandler
+        How is the DriveOverGap state informed that the GuideLine was found
+        to trigger according state change?
+        Also think about this for recognizing the StartFinishLine
+
+        What is the timerID parameter used for in followGuideLine?
+    end note
+
+    class StateHandler {
+        -currentState: EventEnum
+        +process()
+    }
+    note top of StateHandler
+        The main loop repeatedly calls process().
+        The StateHandler starts with the first
+        state and calles its process function.
+        The return value of thes function
+        indicates the next state.
+    end note
+
+    note top of StateHandler
+        The functions called by process() shouldn't
+        block the main loop, so should be fast
+        executed functions that in the next loop may be repeated.
+
+        You shouldn't create your own loops inside modules
+        but reather use the existing main-loop.
+    end note
+
+    StateHandler ..> EventsEnum
+    
+
+    package States {
+
+        StateHandler ..> InitializeMcu
+        StateHandler ..> CalibrateLineSensors
+        StateHandler ..> ReadyToDrive
+        StateHandler ..> DriveToStart
+        StateHandler ..> DriveToFinish
+        StateHandler ..> DriveOverGap
+        StateHandler ..> DisplayCountdown
+        StateHandler ..> DisplayLapTime
+        StateHandler ..> ErrorHandlerState
+        StateHandler ..> SetParameters
+
+        class InitializeMcu {
+            +initMcu(void): EventEnum 
+        }
+        note top of InitializeMcu
+            For easier overview for us it would be okay to simply connect
+            InitializeMcu with other layers.
+                InitializeMcu .[#Blue].> Service
+                InitializeMcu .[#Blue].> HAL
+
+            For this easy case the function is selfexplainatory enough.
+        end note
+
+        class CalibrateLineSensors {
+            +calibrateLineSensors(void): EventEnum
+        }
+        note top of CalibrateLineSensors
+            ok
+        end note
+
+        class ReadyToDrive {
+            +waitForInput(void): EventEnum
+        }
+        note top of ReadyToDrive
+            ok
+        end note
+
+        class DriveToStart {
+            +driveToStart(void): EventEnum
+        }
+        DriveToStart .[#Brown].> DriveHandler
+        note top of DriveToStart
+            Connection to LineSensor missing to decide when startLine was detected?
+            This information may be relevant for more than one only DriveToStart and may require a new class
+            Remember DRY, SRP and our goal to get high cohesion in our modules
+        end note
+
+        class DriveToFinish {
+            +startRacing(void): EventEnum
+        }
+        DriveToFinish .[#Violet].> DriveHandler
+        note top of DriveToFinish
+            connection to LineSensor missing?
+            see comment at DriveToStart regarding this topic
+        end note
+
+        class DriveOverGap {
+            +crossGap(void): EventEnum
+        }
+        DriveOverGap .[#gold].> DriveHandler
+        note top of DriveOverGap
+            ok
+        end note
+
+        class DisplayCountdown {
+            +startCountDown(void): EventEnum
+        }
+        note top of DisplayCountdown
+            ok
+        end note
+
+        class DisplayLapTime {
+            -startTimeMs: UInt32
+            +showLapTime(void): EventEnum
+        }
+        note top of DisplayLapTime
+            Where do you get "startTimeMs" from? (Is it needed?)
+
+            How is the information which is the lap timer id
+            shared between the different driving states?
+        end note
+
+        class SetParameters {
+            -paramSetIdx: UInt8
+            -paramSetArray[]: ParamSet
+            -nextParamSet(void): void
+            -displayParamSetIdx(void): void
+            +getCurrentPrameterSet(void): ParamSet
+            +nextParamSet(void): EventEnum
+        }
+        note top of SetParameters
+            ok
+        end note
+
+        DriveHandler ..> SetParameters
+
+        class ErrorHandlerState{
+            +DisplayError(errorReason: EventsEnum): void
+        }
+        ErrorHandlerState .[#Orange].> DriveHandler
+        note top of ErrorHandlerState
+            Why no connection to ErrorHandler?
+            (Will take care of displaying error,
+            so also no need to connect to display)
+
+            Doesn't the DisplayError function still require
+            a return value? Even though it will always be
+            ErrorHandlerState I guess. How will you prevent
+            the buzzer not beeing toggled every main-loop again?
+        end note
+
+    }
+
+    MainTask .left.> StateHandler
+
+}
+
+ReadyToDrive .[#green].> Display
+ReadyToDrive .[#green].> Button
+
+DisplayCountdown .[#FireBrick].> Display
+DisplayCountdown .[#FireBrick].> SoftTimer
+
+DisplayLapTime .[#Olive].> SoftTimer
+DisplayLapTime .[#Olive].> Buzzer
+DisplayLapTime .[#Olive].> Display
+
+SetParameters .[#LimeGreen].> SoftTimer
+SetParameters .[#LimeGreen].> Display
+
+DriveOverGap .[#gold].> SoftTimer
+
+DriveToFinish .[#Violet].> SoftTimer
+
+DriveToStart .[#Brown].> SoftTimer
+DriveToStart .[#Brown].> Buzzer
+
+ErrorHandlerState .[#Orange].> Display
+ErrorHandlerState .[#Orange].> Buzzer
+
+CalibrateLineSensors .[#red].> DriveControl
+CalibrateLineSensors .[#red].> LineSensor
+
+InitializeMcu .[#Blue].> Buzzer
+InitializeMcu .[#Blue].> Button
+InitializeMcu .[#Blue].> DriveControl
+InitializeMcu .[#Blue].> LineSensor
+InitializeMcu .[#Blue].> LED
+InitializeMcu .[#Blue].> Display
+
+DriveHandler .[#LightCoral].> DriveControl
+DriveHandler .[#LightCoral].> LineSensor
+
+note top of Application #99FF99 {
+    Update with your Application content here
+
+}
+
+' ++++++++++++++++++++++++++++++++
+' Service
+
+Button ..> GPIO
+Button ..> SoftTimer
+
+Buzzer ..> PWM
+Buzzer ..> SoftTimer
+
+Display ..> GPIO
+Display ..> TickTimer
+Display ..> ErrorHandler
+
+DriveControl ..> GPIO
+DriveControl ..> PWM
+DriveControl ..> IRQ
+
+LED ..> GPIO
+
+LineSensor ..> SoftTimer
+LineSensor ..> GPIO
+LineSensor ..> TickTimer
+LineSensor .r.> Display
+
+' ++++++++++++++++++++++++++++++++
+' OS
+
+' ErrorHandler ..> HAL
+
+SoftTimer ..> TickTimer
+
+Scheduler ..> Task
+Scheduler ..> IRQ
+
+@enduml
