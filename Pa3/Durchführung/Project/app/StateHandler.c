@@ -14,7 +14,7 @@
 #include "app/EventEnum.h"
 #include "app/State/InitializeMcu.h"
 #include "app/State/CalibrateLineSensors.h"
-#include "app/State/eadyToDrive.h"
+#include "app/State/ReadyToDrive.h"
 #include "app/State/DriveToStart.h"
 #include "app/State/DriveToFinish.h"
 #include "app/State/DriveOverGap.h"
@@ -95,6 +95,10 @@ void StateHandler_process(void)
         DisplayCountdown_StopCountdown(void); //exit
         gCurrentState = STATE_DRIVE_TO_START;
       }
+      else
+      {
+        //nothing should happen
+      }
       break;
 
     case STATE_DRIVE_TO_START:        
@@ -117,6 +121,10 @@ void StateHandler_process(void)
         gEntryDone = false;
         DriveToStart_StopTimer(void); //exit
         gLapTimer = DriveToStart_StartTimerAndBeep(void); //State drive to finish is next
+      }
+      else
+      {
+        //nothing should happen
       }
       break;
 
@@ -167,6 +175,10 @@ void StateHandler_process(void)
       {
         gCurrentState = STATE_ERROR_HANDLER;
         gEntryDone = false;
+      }
+      else
+      {
+        //nothing should happen
       }
       break;
 
