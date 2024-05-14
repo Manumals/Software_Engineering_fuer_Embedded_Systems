@@ -39,13 +39,6 @@ StateDriveToStart: entry / The DriveMotors are supplied with power
 StateDriveToStart: entry / Start Timer DriveToStartTimer
 StateDriveToStart: do / Follow the GuideLine 
 StateDriveToStart: exit / Stop Timer DriveToStartTimer
-note right of StateDriveToStart
-    It is assumed that no gaps occur in this 
-    state, as the robot is set up only a few 
-    centimeters from the start 
-    (at least 3 cm from the start)
-end note
-
 
 'StateDriveToFinish'
 StateDriveToFinish --> StateErrorHandler : LapTimer > 20s
