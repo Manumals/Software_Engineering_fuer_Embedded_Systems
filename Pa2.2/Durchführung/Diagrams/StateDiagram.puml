@@ -34,7 +34,7 @@ end note
 
 'StateDriveToStart'
 StateDriveToStart --> StateDriveToFinish : StartFinishLine is recognized / The Buzzer emits the ShortBeep, Start the LapTimer 
-StateDriveToStart --> StateErrorHandler : DriveToStart is active for more than 10s or The GuideLine is lost
+StateDriveToStart --> StateErrorHandler : DriveToStart is active for more than 10s
 StateDriveToStart: entry / The DriveMotors are supplied with power 
 StateDriveToStart: entry / Start Timer DriveToStartTimer
 StateDriveToStart: do / Follow the GuideLine 
@@ -71,11 +71,9 @@ The current parameter set is displayed for 0.5 seconds on line 3
 end note
 
 'StateSetParameters
-StateSetParameters --> StateReadyToDrive : State SetParameters is active for more \n than 0.5s [SetparametersTimer > 0.5s]
+StateSetParameters --> StateReadyToDrive : Next ParamSet is selected
 StateSetParameters: entry / Cycle to the next parameter set
-StateSetParameters: entry / Start Timer SetparametersTimer
 StateSetParameters: exit / Display parameter set number
-StateSetParameters: exit / Stop Timer SetparametersTimer
 note bottom of StateSetParameters
 The parameter set number is permanently displayed in line 4
 end note
