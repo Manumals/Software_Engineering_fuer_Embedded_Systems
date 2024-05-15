@@ -48,9 +48,32 @@ void StateHandler_process(void)
       gCurrentState = STATE_CALIBRATE_LINE_SENSORS;
       break;
 
-    case STATE_CALIBRATE_LINE_SENSORS: 
-      CalibrateLineSensors_CalibrateSensors(void); //do
-      gCurrentState = STATE_READY_TO_DRIVE;
+    case STATE_CALIBRATE_LINE_SENSORS:
+      if(gEntryDone == false)
+      {
+        gEntryDone = true;
+        gCurrentEvent = CalibrateLineSensors_Initialize(void); //entry
+        if (NO_EVENT_HAS_HAPPEND != gCurrentEvent)
+        {
+          gCurrentState = STATE_ERROR_HANDLER;
+        }
+      }
+
+      gCurrentEvent = CalibrateLineSensors_CalibrateSensors(void); //do
+      switch (gCurrentEvent)
+      {
+        case CALIBRATION_FAILED:
+          gCurrentState = STATE_ERROR_HANDLER;
+          break;
+
+        case CALIBRATION_DONE:
+          gEntryDone = false;
+          gCurrentState = STATE_READY_TO_DRIVE;
+          break;
+
+        default:
+          break; 
+      }
       break;
 
     case STATE_READY_TO_DRIVE:         
@@ -71,11 +94,11 @@ void StateHandler_process(void)
           break;
 
         default:
-        break; 
+          break; 
       }
       break;
 
-    case STATE_CALIBRATE_LINE_SENSORS:
+    case STATE_SET_PARAMETERS
       SetParameters_SetNextParamSet(void); //entry
       SetParameters_DisplayParamSet(void); //exit
       gCurrentState = STATE_READY_TO_DRIVE;
