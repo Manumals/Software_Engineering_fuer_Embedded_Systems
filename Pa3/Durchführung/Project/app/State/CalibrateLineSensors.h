@@ -22,6 +22,11 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
+/** Initializes all variables that are needed for the calibration 
+* entry function of the state
+*/
+extern EventEnum CalibrateLineSensors_Initialize(void);
+
 /** Calibrates the five line sensors so that the line is recognized under the current light conditions 
 * do function of the state
 * @return CALIBRATION_DONE : Calibration is complete
