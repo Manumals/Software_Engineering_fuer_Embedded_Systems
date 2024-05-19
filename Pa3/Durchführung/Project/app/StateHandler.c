@@ -29,7 +29,35 @@
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
+/** The next state is decided on the basis of the transferred parameter 
+ * @param[in] gCurrentEvent Event that occurred in Drive to Start
+*/
+static void DriveToStartEvent(EventEnum gCurrentEvent);
 
+/** The next state is decided on the basis of the transferred parameter 
+ * @param[in] gCurrentEvent Event that occurred in Drive to Finish
+*/
+static void DriveToFinishEvent(EventEnum gCurrentEvent);
+
+/** The next state is decided on the basis of the transferred parameter 
+ * @param[in] gCurrentEvent Event that occurred in Drive Over Gap
+*/
+static void DriveOverGapEvent(EventEnum gCurrentEvent);
+
+/** The next state is decided on the basis of the transferred parameter 
+ * @param[in] gCurrentEvent Event that occurred in Count Down Event
+*/
+static void DisplayCountDownEvent(EventEnum gCurrentEvent);
+
+/** The next state is decided on the basis of the transferred parameter 
+ * @param[in] gCurrentEvent Event that occurred in Ready to Drive
+*/
+static void ReadyToDriveEvent(EventEnum gCurrentEvent);
+
+/** The next state is decided on the basis of the transferred parameter 
+ * @param[in] gCurrentEvent Event that occurred in Calibrate Line Sensors
+*/
+static void CalibrateLineSensorsEvent(EventEnum gCurrentEvent);
 /* VARIABLES **************************************************************************************/
 static EventEnum gCurrentEvent = NO_EVENT_HAS_HAPPEND; 
 static StateEnum gCurrentState = STATE_INIZALIZATION_MCU; /**< First state when the MCU is started */
@@ -49,15 +77,10 @@ void StateHandler_process(void)
         break;
 
     case STATE_CALIBRATE_LINE_SENSORS:
-        if (gEntryDone == false)
+        if (false == gEntryDone)
         {
             gEntryDone = true;
             gCurrentEvent = CalibrateLineSensors_Initialize(); /**< entry */
-            if (NO_EVENT_HAS_HAPPEND != gCurrentEvent)
-            {
-                 gEntryDone = false;
-                gCurrentState = STATE_ERROR_HANDLER;
-            }
         }
         gCurrentEvent = CalibrateLineSensors_CalibrateSensors();
         CalibrateLineSensorsEvent(gCurrentEvent); /**< do */
@@ -138,18 +161,18 @@ static void DriveToStartEvent(EventEnum gCurrentEvent)
         {
             gCurrentState = STATE_ERROR_HANDLER;
             gEntryDone = false;
-            DriveToStart_StopTimer(); //exit
+            DriveToStart_StopTimer(); /**< exit */
         }
         else if (START_FINISH_LINE_WAS_RECOGINZED == gCurrentEvent)
         {
             gCurrentState = STATE_DRIVE_TO_FINISH;
             gEntryDone = false;
-            DriveToStart_StopTimer(); //exit
+            DriveToStart_StopTimer(); /**< exit */
             gLapTimer = DriveToStart_StartTimerAndBeep(); /**< State drive to finish is next */
         }
         else
         {
-            /* nothing should happen */
+            /** nothing should happen */
         }
 }
 
@@ -188,13 +211,13 @@ static void DriveOverGapEvent(EventEnum gCurrentEvent)
     }
     else
     {
-        /* nothing should happen */
+        /** nothing should happen */
     }
 }
 
 static void DisplayCountDownEvent(EventEnum gCurrentEvent)
 {
-    if (gCurrentEvent == COUNTDOWN_IS_FINISHED)
+    if (COUNTDOWN_IS_FINISHED == gCurrentEvent)
     {
         gEntryDone = false;
         DisplayCountdown_StopCountdown(); /**< exit */
@@ -202,13 +225,13 @@ static void DisplayCountDownEvent(EventEnum gCurrentEvent)
     }
     else
     {
-        /* nothing should happen */
+        /** nothing should happen */
     }
 }
 
 static void ReadyToDriveEvent(EventEnum gCurrentEvent)
 {
-    switch(gCurrentEvent)
+    switch (gCurrentEvent)
     {
     case CALIBRATION_BUTTON_HAS_BEEN_RELEASED:
         gCurrentState = STATE_CALIBRATE_LINE_SENSORS;
@@ -223,6 +246,7 @@ static void ReadyToDriveEvent(EventEnum gCurrentEvent)
         break;
 
     default:
+        /** nothing should happen */
         break; 
     }
 }
@@ -232,6 +256,7 @@ static void CalibrateLineSensorsEvent(EventEnum gCurrentEvent)
     switch (gCurrentEvent)
     {
     case CALIBRATION_FAILED:
+        gEntryDone = false;
         gCurrentState = STATE_ERROR_HANDLER;
         break;
 
@@ -241,6 +266,7 @@ static void CalibrateLineSensorsEvent(EventEnum gCurrentEvent)
         break;
 
     default:
+        /** nothing should happen */
         break; 
     }
 }

@@ -38,35 +38,4 @@ typedef enum
 */
 extern void StateHandler_process(void);
 
-/* INTERNAL FUNCTIONS *****************************************************************************/
-/** The next state is decided on the basis of the transferred parameter 
- * @param[in] gCurrentEvent Event that occurred in Drive to Start
-*/
-static void DriveToStartEvent(EventEnum gCurrentEvent);
-
-/** The next state is decided on the basis of the transferred parameter 
- * @param[in] gCurrentEvent Event that occurred in Drive to Finish
-*/
-static void DriveToFinishEvent(EventEnum gCurrentEvent);
-
-/** The next state is decided on the basis of the transferred parameter 
- * @param[in] gCurrentEvent Event that occurred in Drive Over Gap
-*/
-static void DriveOverGapEvent(EventEnum gCurrentEvent);
-
-/** The next state is decided on the basis of the transferred parameter 
- * @param[in] gCurrentEvent Event that occurred in Count Down Event
-*/
-static void DisplayCountDownEvent(EventEnum gCurrentEvent);
-
-/** The next state is decided on the basis of the transferred parameter 
- * @param[in] gCurrentEvent Event that occurred in Ready to Drive
-*/
-static void ReadyToDriveEvent(EventEnum gCurrentEvent);
-
-/** The next state is decided on the basis of the transferred parameter 
- * @param[in] gCurrentEvent Event that occurred in Calibrate Line Sensors
-*/
-static void CalibrateLineSensorsEvent(EventEnum gCurrentEvent);
-
 #endif /* STATEHANDLER_H */
