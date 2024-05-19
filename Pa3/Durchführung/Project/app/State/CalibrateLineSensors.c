@@ -9,7 +9,7 @@
 /**************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-#include "app/State/CalibrateLineSensors.h"
+#include "CalibrateLineSensors.h"
 
 #include "service/DriveControl.h"
 #include "service/LineSensor.h"
@@ -20,7 +20,7 @@
 /* CONSTANTS **************************************************************************************/
 #define CALIB_SPEED 33u       /**< Motor speed while calibrating */
 #define CALIB_SPEED_SLOW 25u  /**< Motor speed while centering on line  */
-
+#define TIME_OUT_TIME 5000u    /**< Time out for the state */
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
@@ -38,14 +38,6 @@ typedef enum tag_CalibrationState
 
 /* PROTOTYPES *************************************************************************************/
 
-/** Reaction to processCycle event.
- * 
- * Handles internal state machine processing.
- *
- * @param[in] pState Pointer to context state.
- */
-static void onProcessCycleEvent (StateHandlerStatePtr pState);
-
 /* VARIABLES **************************************************************************************/
 
 /** Calibration state of local state machine */
@@ -57,54 +49,17 @@ static EventEnum gResult;
 /** Timer used by calibration steps. */
 static SoftTimer gTimer;
 
-/** CalibrationTask task structure. */
-static Task gCalibrationTask;
-
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum CalibrateLineSensors_Initialize(void)
+void CalibrateLineSensors_Initialize(void)
 {
-    EventEnum result = CALIBRATION_FAILED;
     gState = CALIBRATION_STATE_INIT;
-    gResult = NO_EVENT_HAS_HAPPEND;
-
-    //Add Task to scheduler
-    if (TASK_RET_SUCCESS == Task_init(&gCalibrationTask, onProcessCycleEvent, TASK_STATE_RUNNING, NULL))
-    {
-        if ( SCHEDULER_RET_SUCCESS == Scheduler_addTask(&gCalibrationTask))
-        {
-            result = NO_EVENT_HAS_HAPPEND;
-        }
-    }
-
-    return result;
 }
 
 EventEnum CalibrateLineSensors_CalibrateSensors(void)
 {
-    if (NO_EVENT_HAS_HAPPEND != gResult)
-    {
-        if (CALIBRATION_STATE_DONE != gState)
-        {
-            //This should never happen, gState is always set to CALIBRATION_STATE_DONE before gResult is set
-            gState = CALIBRATION_STATE_DONE;
-            gResult = CALIBRATION_FAILED;
-        }
-
-        //Remove Task from scheduler
-        if (SCHEDULER_RET_SUCCESS != Scheduler_removeTask(&gCalibrationTask))
-        {
-            gResult = CALIBRATION_FAILED;
-        }
-    }
-    return gResult;
-}
-
-/* INTERNAL FUNCTIONS *****************************************************************************/
-
-static void onProcessCycleEvent(StateHandlerStatePtr pState)
-{
     LineSensorValues values;
+    gResult = NO_EVENT_HAS_HAPPEND;
 
     switch (gState)
     {
@@ -112,7 +67,7 @@ static void onProcessCycleEvent(StateHandlerStatePtr pState)
             if (SOFTTIMER_IS_EXPIRED(&gTimer))
             {
                 gState = CALIBRATION_STATE_TURN_RIGHT_UNTIL_LEFT_SENSOR;
-                SoftTimer_start(&gTimer, 5000u);
+                SoftTimer_start(&gTimer, TIME_OUT_TIME);
                 LineSensor_startCalibration();
             }
             break;
@@ -148,7 +103,7 @@ static void onProcessCycleEvent(StateHandlerStatePtr pState)
             {
                 if (!LineSensor_getCalibrationState())
                 {
-                    /* restart sequence, some sensors not yet calibrated. */
+                    /** restart sequence, some sensors not yet calibrated. */
                     gState = CALIBRATION_STATE_TURN_RIGHT_UNTIL_LEFT_SENSOR;
                 }
                 else 
@@ -170,7 +125,7 @@ static void onProcessCycleEvent(StateHandlerStatePtr pState)
 
             LineSensor_read(&values);
 
-            /* stop if only middle sensor sees a line */
+            /** stop if only middle sensor sees a line */
 
             if (CALIB_NO_LINE(values.value[LINESENSOR_LEFT]) &&
                 CALIB_NO_LINE(values.value[LINESENSOR_MIDDLE_LEFT]) &&
@@ -206,4 +161,7 @@ static void onProcessCycleEvent(StateHandlerStatePtr pState)
             gResult = CALIBRATION_DONE;
             break;
     }
+    return gResult;
 }
+
+/* INTERNAL FUNCTIONS *****************************************************************************/

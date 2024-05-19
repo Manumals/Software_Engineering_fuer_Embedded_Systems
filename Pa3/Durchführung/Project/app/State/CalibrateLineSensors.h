@@ -24,10 +24,8 @@
 
 /** Initializes all variables that are needed for the calibration 
 * entry function of the state
-* @return NO_EVENT_HAS_HAPPEND: Initialization was successful
-* @return CALIBRATION_FAILED : Initialization failed
 */
-extern EventEnum CalibrateLineSensors_Initialize(void);
+extern void CalibrateLineSensors_Initialize(void);
 
 /** Calibrates the five line sensors so that the line is recognized under the current light conditions 
 * do function of the state
