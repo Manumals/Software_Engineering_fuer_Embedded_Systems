@@ -34,8 +34,8 @@ extern void DriveHandler_FindGuideLine(void);
 
 /** Follow the guide line according to the transferred line sensor values
 *
-* @param[in] sensorValues Indicates the line sensors from left (bit 0) to right (bit 4) in the first 5 bits. 1 means line detected 0 no line detected 
+* @param[in] sensorValues Array with the five line sensor values
 */
-extern void DriveHandler_FollowGuideLine(UInt8 sensorValues);
+extern void DriveHandler_FollowGuideLine(const LineSensorValues *sensorValues);
 
 #endif /* DRIVEHANDLER_H */
