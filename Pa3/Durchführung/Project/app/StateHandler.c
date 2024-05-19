@@ -9,9 +9,9 @@
 /**************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-#include "app/StateHandler.h"
+#include "StateHandler.h"
+#include "EventEnum.h"
 
-#include "app/EventEnum.h"
 #include "app/State/InitializeMcu.h"
 #include "app/State/CalibrateLineSensors.h"
 #include "app/State/ReadyToDrive.h"
@@ -32,7 +32,7 @@
 
 /* VARIABLES **************************************************************************************/
 static EventEnum gCurrentEvent = NO_EVENT_HAS_HAPPEND; 
-static StateEnum gCurrentState = STATE_INIZALIZATION_MCU; //First state when the MCU is started
+static StateEnum gCurrentState = STATE_INIZALIZATION_MCU; /**< First state when the MCU is started */
 static SoftTimer* gLapTimer;
 static bool gEntryDone = false;
 
@@ -40,181 +40,207 @@ static bool gEntryDone = false;
 
 void StateHandler_process(void)
 {
-  switch(gCurrentState)
-  { 
+    switch (gCurrentState)
+    { 
     case STATE_INIZALIZATION_MCU: 
-      InitializeMcu_InitializeAll(void); //entry
-      InitializeMcu_DisplayTeamName(void); //exit
-      gCurrentState = STATE_CALIBRATE_LINE_SENSORS;
-      break;
+        InitializeMcu_InitializeAll(); /**< entry */
+        InitializeMcu_DisplayTeamName(); /**< exit */
+        gCurrentState = STATE_CALIBRATE_LINE_SENSORS;
+        break;
 
     case STATE_CALIBRATE_LINE_SENSORS:
-      if(gEntryDone == false)
-      {
-        gEntryDone = true;
-        gCurrentEvent = CalibrateLineSensors_Initialize(void); //entry
-        if (NO_EVENT_HAS_HAPPEND != gCurrentEvent)
+        if (gEntryDone == false)
         {
-          gCurrentState = STATE_ERROR_HANDLER;
+            gEntryDone = true;
+            gCurrentEvent = CalibrateLineSensors_Initialize(); /**< entry */
+            if (NO_EVENT_HAS_HAPPEND != gCurrentEvent)
+            {
+                 gEntryDone = false;
+                gCurrentState = STATE_ERROR_HANDLER;
+            }
         }
-      }
+        gCurrentEvent = CalibrateLineSensors_CalibrateSensors();
+        CalibrateLineSensorsEvent(gCurrentEvent); /**< do */
+        break;
 
-      gCurrentEvent = CalibrateLineSensors_CalibrateSensors(void); //do
-      switch (gCurrentEvent)
-      {
-        case CALIBRATION_FAILED:
-          gCurrentState = STATE_ERROR_HANDLER;
-          break;
-
-        case CALIBRATION_DONE:
-          gEntryDone = false;
-          gCurrentState = STATE_READY_TO_DRIVE;
-          break;
-
-        default:
-          break; 
-      }
-      break;
-
-    case STATE_READY_TO_DRIVE:         
-      gCurrentEvent = ReadyToDrive_CheckStateOfButtons(void); //do
-
-      switch(gCurrentEvent)
-      {
-        case CALIBRATION_BUTTON_HAS_BEEN_RELEASED:
-          gCurrentState = STATE_CALIBRATE_LINE_SENSORS;
-          break;
-
-        case START_BUTTON_HAS_BEEN_RELEASED:
-          gCurrentState = STATE_DISPLAY_COUNTDOWN;
-          break;
-
-        case PARAM_BUTTON_HAS_BEEN_RELEASED:
-          gCurrentState = STATE_SET_PARAMETERS;
-          break;
-
-        default:
-          break; 
-      }
-      break;
+    case STATE_READY_TO_DRIVE:
+        gCurrentEvent = ReadyToDrive_CheckStateOfButtons();
+        ReadyToDriveEvent(gCurrentEvent); /**< do */
+        break;
 
     case STATE_SET_PARAMETERS
-      SetParameters_SetNextParamSet(void); //entry
-      SetParameters_DisplayParamSet(void); //exit
-      gCurrentState = STATE_READY_TO_DRIVE;
-      break;
+        SetParameters_SetNextParamSet(); /**< entry */
+        SetParameters_DisplayParamSet(); /**< exit */
+        gCurrentState = STATE_READY_TO_DRIVE;
+        break;
 
     case STATE_DISPLAY_COUNTDOWN:      
-      if(gEntryDone == false)
-      {
-        gEntryDone = true;
-        DisplayCountdown_StartCountdown(void); //entry
-      }
-      gCurrentEvent = DisplayCountdown_DisplayCountdown(void); //do
-
-      if (gCurrentEvent == COUNTDOWN_IS_FINISHED)
-      {
-        gEntryDone = false;
-        DisplayCountdown_StopCountdown(void); //exit
-        gCurrentState = STATE_DRIVE_TO_START;
-      }
-      else
-      {
-        //nothing should happen
-      }
-      break;
+        if (false == gEntryDone)
+        {
+            gEntryDone = true;
+            DisplayCountdown_StartCountdown(); /**< entry */
+        }
+        gCurrentEvent = DisplayCountdown_DisplayCountdown();
+        DisplayCountDownEvent(gCurrentEvent); /**< do */
+        break;
 
     case STATE_DRIVE_TO_START:        
-      if (gEntryDone == false)
-      {
-        gEntryDone = true;
-        DriveToStart_StartMotorsAndTimer(void); //entry
-      }
-      gCurrentEvent = DriveToStart_FollowGuideLine(void); //do
-
-      if (gCurrentEvent == DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG)
-      {
-        gCurrentState = STATE_ERROR_HANDLER;
-        gEntryDone = false;
-        DriveToStart_StopTimer(void); //exit
-      }
-      else if (gCurrentEvent == START_FINISH_LINE_WAS_RECOGINZED)
-      {
-        gCurrentState = STATE_DRIVE_TO_FINISH;
-        gEntryDone = false;
-        DriveToStart_StopTimer(void); //exit
-        gLapTimer = DriveToStart_StartTimerAndBeep(void); //State drive to finish is next
-      }
-      else
-      {
-        //nothing should happen
-      }
-      break;
-
-    case STATE_DRIVE_TO_FINISH: 
-      gCurrentEvent = DriveToFinish_FollowGuideLine(gLapTimer); //do
-      switch(gCurrentEvent)
-      {
-        case GUIDELINE_WAS_LOST:
-          gCurrentState = STATE_DRIVE_OVER_GAP;
+        if (false == gEntryDone)
+        {
+          gEntryDone = true;
+          DriveToStart_StartMotorsAndTimer(); /**< entry */
+        }
+        gCurrentEvent = DriveToStart_FollowGuideLine();
+        DriveToStartEvent(gCurrentEvent); /**< do */
         break;
 
-        case LAPTIME_IS_TOO_LONG:
-          gCurrentState = STATE_ERROR_HANDLER;
-        break;
-
-        case START_FINISH_LINE_WAS_RECOGINZED:
-          gCurrentState = STATE_DISPLAY_LAP_TIME;
-        break;
-
-        default:
-        break;
-      }
+    case STATE_DRIVE_TO_FINISH:
+        gCurrentEvent = DriveToFinish_FollowGuideLine(gLapTimer);
+        DriveToFinishEvent(gCurrentEvent); /**< do */
       break;
 
     case STATE_ERROR_HANDLER:
-      if (gEntryDone == false)
-      {
-        gEntryDone = true;
-        ErrorHandlerState_CallErrorHandler(gCurrentEvent); //entry
-      }
-      ErrorHandlerState_WaitForReset(void); //do
-      break;
+        if (false == gEntryDone)
+        {
+            gEntryDone = true;
+            ErrorHandlerState_CallErrorHandler(gCurrentEvent); /**< entry */
+        }
+        ErrorHandlerState_WaitForReset(); /**< do */
+        break;
 
     case STATE_DRIVE_OVER_GAP:
-      if (gEntryDone == false)
-      {
-        gEntryDone = true;
-        DriveOverGap_SaveCurrentLapTime(gLapTimer); //entry
-      }
-      gCurrentEvent = DriveOverGap_DriveOverGap(gLapTimer); //do
-
-      if (gCurrentEvent == THE_GUIDELINE_WAS_RECOGNIZED)
-      {
-        gCurrentState = STATE_DRIVE_TO_FINISH;
-        gEntryDone = false;
-      } 
-      else if (gCurrentEvent == DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG)
-      {
-        gCurrentState = STATE_ERROR_HANDLER;
-        gEntryDone = false;
-      }
-      else
-      {
-        //nothing should happen
-      }
-      break;
+        if (false == gEntryDone)
+        {
+            gEntryDone = true;
+            DriveOverGap_SaveCurrentLapTime(gLapTimer); /**< entry */
+        }
+        gCurrentEvent = DriveOverGap_DriveOverGap(gLapTimer);
+        DriveOverGapEvent(gCurrentEvent); /**< do */
+        break;
 
     case STATE_DISPLAY_LAP_TIME:
-        gCurrentEvent = DisplayLapTime_StopAfterLap(void); //entry
-        if(gCurrentEvent == POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED)
+        gCurrentEvent = DisplayLapTime_StopAfterLap(); /**< entry */
+        if (POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED == gCurrentEvent)
         {
-          DisplayLapTime_DisplayLapTime(void); //exit
+            DisplayLapTime_DisplayLapTime(); /**< exit */
         }
-      break;
+        break;
 
     default:
-    break;
+        break;
   }
 }
-/* INTERNAL FUNCTIONS *****************************************************************************/
+/* INTERNAL FUNCTIONS *****************************************************************************/ 
+
+static void DriveToStartEvent(EventEnum gCurrentEvent)
+{
+    if (DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG == gCurrentEvent)
+        {
+            gCurrentState = STATE_ERROR_HANDLER;
+            gEntryDone = false;
+            DriveToStart_StopTimer(); //exit
+        }
+        else if (START_FINISH_LINE_WAS_RECOGINZED == gCurrentEvent)
+        {
+            gCurrentState = STATE_DRIVE_TO_FINISH;
+            gEntryDone = false;
+            DriveToStart_StopTimer(); //exit
+            gLapTimer = DriveToStart_StartTimerAndBeep(); /**< State drive to finish is next */
+        }
+        else
+        {
+            /* nothing should happen */
+        }
+}
+
+static void DriveToFinishEvent(EventEnum gCurrentEvent)
+{
+    switch (gCurrentEvent)
+    {
+    case GUIDELINE_WAS_LOST:
+        gCurrentState = STATE_DRIVE_OVER_GAP;
+        break;
+
+    case LAPTIME_IS_TOO_LONG:
+        gCurrentState = STATE_ERROR_HANDLER;
+        break;
+
+    case START_FINISH_LINE_WAS_RECOGINZED:
+        gCurrentState = STATE_DISPLAY_LAP_TIME;
+        break;
+
+    default:
+        break;
+    }    
+}
+
+static void DriveOverGapEvent(EventEnum gCurrentEvent)
+{
+    if (THE_GUIDELINE_WAS_RECOGNIZED == gCurrentEvent)
+    {
+        gCurrentState = STATE_DRIVE_TO_FINISH;
+        gEntryDone = false;
+    } 
+    else if (DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG == gCurrentEvent)
+    {
+        gCurrentState = STATE_ERROR_HANDLER;
+        gEntryDone = false;
+    }
+    else
+    {
+        /* nothing should happen */
+    }
+}
+
+static void DisplayCountDownEvent(EventEnum gCurrentEvent)
+{
+    if (gCurrentEvent == COUNTDOWN_IS_FINISHED)
+    {
+        gEntryDone = false;
+        DisplayCountdown_StopCountdown(); /**< exit */
+        gCurrentState = STATE_DRIVE_TO_START;
+    }
+    else
+    {
+        /* nothing should happen */
+    }
+}
+
+static void ReadyToDriveEvent(EventEnum gCurrentEvent)
+{
+    switch(gCurrentEvent)
+    {
+    case CALIBRATION_BUTTON_HAS_BEEN_RELEASED:
+        gCurrentState = STATE_CALIBRATE_LINE_SENSORS;
+        break;
+
+    case START_BUTTON_HAS_BEEN_RELEASED:
+        gCurrentState = STATE_DISPLAY_COUNTDOWN;
+        break;
+
+    case PARAM_BUTTON_HAS_BEEN_RELEASED:
+        gCurrentState = STATE_SET_PARAMETERS;
+        break;
+
+    default:
+        break; 
+    }
+}
+
+static void CalibrateLineSensorsEvent(EventEnum gCurrentEvent)
+{
+    switch (gCurrentEvent)
+    {
+    case CALIBRATION_FAILED:
+        gCurrentState = STATE_ERROR_HANDLER;
+        break;
+
+    case CALIBRATION_DONE:
+        gEntryDone = false;
+        gCurrentState = STATE_READY_TO_DRIVE;
+        break;
+
+    default:
+        break; 
+    }
+}
