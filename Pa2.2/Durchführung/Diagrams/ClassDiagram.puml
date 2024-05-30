@@ -126,7 +126,8 @@ package "Application"  {
     Scheduler <.up.. MainTask : register
 
     enum EventEnum {
-        INIZALIZATION_DONE = 0,
+        NO_EVENT_HAS_HAPPEND = 0,
+        INIZALIZATION_DONE,
         CALIBRATION_DONE,
         COUNTDOWN_IS_FINISHED,
         POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED,
@@ -138,8 +139,7 @@ package "Application"  {
         GUIDELINE_WAS_LOST,
         LAPTIME_IS_TOO_LONG,
         DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG,
-        DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG,
-        NO_EVENT_HAS_HAPPEND
+        DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG
     }
 
     class DriveHandler {
@@ -175,6 +175,7 @@ package "Application"  {
         }
 
         class CalibrateLineSensors {
+            +CalibrateLineSensors_Initialize(void): EventEnum
             +CalibrateLineSensors_CalibrateSensors(void): EventEnum
         }
 
