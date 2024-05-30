@@ -26,14 +26,14 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum DriveToFinish_followGuideLine(SoftTimer* lapTimer)
+EventEnum DriveToFinish_FollowGuideLine(SoftTimer* lapTimer)
 {
     EventEnum retEvent = NO_EVENT_HAS_HAPPEND;
 
     LineSensorValues* sensorValues;
     LineSensor_read(sensorValues);
 
-    DriveHandler_followGuideLine(sensorValues);
+    DriveHandler_FollowGuideLine(sensorValues);
     
     if (SOFTTIMER_IS_EXPIRED(lapTimer))
     {
