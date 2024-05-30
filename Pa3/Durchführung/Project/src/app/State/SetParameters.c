@@ -23,45 +23,33 @@
 
 /* PROTOTYPES *************************************************************************************/
 
-/** Display the index of the current paramSet on the oled display
- * @return nothing
-*/
-static void displayParamSetIdx(void);
-
 /* VARIABLES **************************************************************************************/
-static UInt8 gParamSetIdx = 0;           /** internal parametersetindex*/
+static UInt8 gParamSetIdx = 0;           /**< internal parametersetindex*/
 static ParamSet gParamSetArray[3] = {{255, 5, 5, 5 ,5}, 
-{150, 3, 3, 3, 3}, {75, 1, 1, 1, 1}};    /** array of parameterset, access via gParamSetIdx*/
+{150, 3, 3, 3, 3}, {75, 1, 1, 1, 1}};    /**< array of parameterset, access via gParamSetIdx*/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
 void SetParameters_SetNextParamSet(void)
 {
-  gParamSetIdx++;
+    gParamSetIdx++;
   
-  if (3 >= gParamSetIdx)
-  {
-    gParamSetIdx = 0;
-  }
+    if (3 >= gParamSetIdx)
+    {
+        gParamSetIdx = 0;
+    }
 }
 
 void SetParameters_DisplayParamSet(void)
 {
-  displayParamSetIdx();
+    Display_gotoxy(0,3);
+    Display_clearLine();
+    char indexString[16] = "Current Index ";
+    indexString[15] = OFFSET_FOR_CHAR + gParamSetIdx; /**< Add the current index as a number */
+    Display_write(indexString, 16);
 }
 
 ParamSet SetParameters_getCurrentParamSet(void)
 {
-  return gParamSetArray[gParamSetIdx];
-}
-
-/* INTERNAL FUNCTIONS *****************************************************************************/
-
-static void displayParamSetIdx(void)
-{
-  Display_gotoxy(0,3);
-  Display_clearLine();
-  char indexString[16] = "Current Index ";
-  indexString[15] = OFFSET_FOR_CHAR + gParamSetIdx; //Add the current index as a number 
-  Display_write(indexString, 16);
+    return gParamSetArray[gParamSetIdx];
 }
