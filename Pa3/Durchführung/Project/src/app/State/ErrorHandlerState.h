@@ -25,15 +25,10 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Convert the event into an error code and output it via the ErrorHandler on the display
+/** Convert the event into an error code and output it via the ErrorHandler on the display and wait for the user to reset the microcontroller
 * entry function of the state
 * @param[in] errorReason The event that triggered the error
 */
 extern void ErrorHandlerState_CallErrorHandler(EventEnum errorReason);
-
-/** Wait for the user to reset the microcontroller
-* do function of the state
-*/
-extern void ErrorHandlerState_WaitForReset(void);
 
 #endif /* ERRORHANDLERSTATE_H */

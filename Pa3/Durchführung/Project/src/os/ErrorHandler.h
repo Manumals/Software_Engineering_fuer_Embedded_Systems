@@ -37,24 +37,27 @@ extern "C"
 /** All error codes. */
 typedef enum tag_ErrorCode
 {
+//Todo: Use unused error codes or delete them
     ERRORHANDLER_MAIN_SCHEDULER_EXIT           =   1,   /**< Unexpected scheduler return.                           */
-    ERRORHANDLER_MAINTASK_INIT_FAIL            = 100,   /**< Initialization of main task failed.                    */
+//    ERRORHANDLER_MAINTASK_INIT_FAIL            = 100,   /**< Initialization of main task failed.                    */
     ERRORHANDLER_STARTUP_INIT_FAIL             = 110,   /**< Startup state init error                               */
-    ERRORHANDLER_STARTUP_UNINIT_FAIL           = 111,   /**< Startup state unint error                              */
-    ERRORHANDLER_CALIBRATE_TIMER_INIT_FAIL     = 200,   /**< Timer initialization in state CALIBRATION failed.      */
-    ERRORHANDLER_CALIBRATE_ALOGRITMIC_FAIL     = 201,   /**< Logical failure in state CALIBRATION.                  */
-    ERRORHANDLER_CALIBRATE_TIMEOUT             = 202,   /**< Timeout in state CALIBRATIION.                         */
-    ERRORHANDLER_CALIBRATE_TIMER_UNINIT_FAIL   = 203,   /**< Timer uninitialization failed in state CALIBRATION.    */
-    ERRORHANDLER_RELEASETRACK_TIMER_INIT_FAIL  = 250,   /**< Timer initialization in state RELEASE_TRACK failed.    */
-    ERRORHANDLER_RELEASETRACK_TIMER_UNINIT_FAIL= 251,   /**< Timer uninitialization failed in state RELEASE_TRACK.  */
-    ERRORHANDLER_RELEASETRACK_TIMER_START_FAIL = 252,   /**< Timer start failed in state RELEASE_TRACK.             */
-    ERRORHANDLER_DRIVING_TIMER_INIT_FAIL       = 300,   /**< Timer initialization in state DRIVING failed.          */
-    ERRORHANDLER_DRIVING_TIMER_UNINIT_FAIL     = 301,   /**< Timer uninitialization failed in state DRIVING.        */
+//    ERRORHANDLER_STARTUP_UNINIT_FAIL           = 111,   /**< Startup state unint error                              */
+//    ERRORHANDLER_CALIBRATE_TIMER_INIT_FAIL     = 200,   /**< Timer initialization in state CALIBRATION failed.      */
+//    ERRORHANDLER_CALIBRATE_ALOGRITMIC_FAIL     = 201,   /**< Logical failure in state CALIBRATION.                  */
+//    ERRORHANDLER_CALIBRATE_TIMEOUT             = 202,   /**< Timeout in state CALIBRATIION.                         */
+//    ERRORHANDLER_CALIBRATE_TIMER_UNINIT_FAIL   = 203,   /**< Timer uninitialization failed in state CALIBRATION.    */
+    ERRORHANDLER_CALIBRATE_FAIL                = 204,   /**< Calibration failed for any reason.                   */
+//    ERRORHANDLER_RELEASETRACK_TIMER_INIT_FAIL  = 250,   /**< Timer initialization in state RELEASE_TRACK failed.    */
+//    ERRORHANDLER_RELEASETRACK_TIMER_UNINIT_FAIL= 251,   /**< Timer uninitialization failed in state RELEASE_TRACK.  */
+//    ERRORHANDLER_RELEASETRACK_TIMER_START_FAIL = 252,   /**< Timer start failed in state RELEASE_TRACK.             */
+//    ERRORHANDLER_DRIVING_TIMER_INIT_FAIL       = 300,   /**< Timer initialization in state DRIVING failed.          */
+//    ERRORHANDLER_DRIVING_TIMER_UNINIT_FAIL     = 301,   /**< Timer uninitialization failed in state DRIVING.        */
     ERRORHANDLER_DRIVING_TIMER_START_FAIL      = 302,   /**< Timer start failed in state DRIVING.                   */
     ERRORHANDLER_DRIVING_TIMEOUT               = 303,   /**< Timeout in state DRIVING.                              */
     ERRORHANDLER_LINELOST_TIMEOUT              = 304,   /**< Timeout in state LINE LOST.                            */
-    ERRORHANDLER_FINISH_TIMER_INIT_FAIL        = 400,   /**< Finish state timer register error                      */
-    ERRORHANDLER_FINISH_TIMER_UNINIT_FAIL      = 401,   /**< Finish state timer un-register error                   */
+//    ERRORHANDLER_FINISH_TIMER_INIT_FAIL        = 400,   /**< Finish state timer register error                      */
+//    ERRORHANDLER_FINISH_TIMER_UNINIT_FAIL      = 401,   /**< Finish state timer un-register error                   */
+    ERRORHANDLER_UNKNOWN_ERROR                 = 500,   /**< Unknown error                                          */
 } ErrorHandlerErrorCode;
 
 /** Callback function type for showing errror codes "somewhere".

@@ -36,7 +36,7 @@ extern EventEnum DisplayLapTime_StopAfterLap(SoftTimer* lapTimer);
 /** Display the laptime on the OLED-display
 * exit function of the state
 */
-extern void DisplayLapTime_DisplayLapTime(void);
+extern void DisplayLapTime_DisplayLapTime(SoftTimer* lapTimer);
 
 #endif /* DISPLAYLAPTIME_H */
 
