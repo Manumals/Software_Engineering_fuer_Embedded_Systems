@@ -16,7 +16,7 @@
 #include "service/Display.h"
 
 /* CONSTANTS **************************************************************************************/
-#define TIME_MAX_MS 3000
+#define TIME_MAX_MS (3000)
 
 /* MACROS *****************************************************************************************/
 
@@ -32,6 +32,7 @@ static UInt8 gLastTime;
 
 void DisplayCountdown_StartCountdown(void)
 {
+    //Todo: No proper error handling
     gLastTime = 0U;
     SoftTimer_init(&gCountdownTimer);
     SoftTimerHandler_register(&gCountdownTimer);
@@ -67,6 +68,7 @@ EventEnum DisplayCountdown_DisplayCountdown(void)
 
 void DisplayCountdown_StopCountdown(void)
 {
+    //Todo: No proper error handling
     SoftTimer_Stop(&gCountdownTimer);
     SoftTimerHandler_unRegister(&gCountdownTimer);
 }

@@ -29,6 +29,7 @@
 
 EventEnum DisplayLapTime_StopAfterLap(SoftTimer* lapTimer)
 {
+    //Todo: No proper error handling
     /* Stop the lapTime timer */
     SoftTimer_Stop(lapTimer);
 
