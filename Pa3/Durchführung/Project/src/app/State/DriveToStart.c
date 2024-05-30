@@ -75,6 +75,7 @@ void DriveToStart_StopTimer(void)
 SoftTimer* DriveToStart_StartTimerAndBeep(void)
 {
     SoftTimer_Ret status;
+    SoftTimer* retTimer;
 
     if (SOFT_TIMER_UNREGISTERED == gLapTimer->state)
     {
@@ -83,9 +84,12 @@ SoftTimer* DriveToStart_StartTimerAndBeep(void)
     if (SOFTTIMER_RET_SUCCESS == status)
     {
         SoftTimer_start(gLapTimer, MAX_LAP_TIME_s);
+        retTimer = gLapTimer;
     }
 
     Buzzer_beep(BUZZER_NOTIFY);
+
+    return retTimer;
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
