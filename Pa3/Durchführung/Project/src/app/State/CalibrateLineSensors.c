@@ -16,6 +16,7 @@
 
 #include "os/Task.h"
 #include "os/Scheduler.h"
+#include "os/SoftTimer.h"
 
 /* CONSTANTS **************************************************************************************/
 #define CALIB_SPEED 33u       /**< Motor speed while calibrating */
@@ -82,7 +83,7 @@ EventEnum CalibrateLineSensors_CalibrateSensors(void)
             }
 
             LineSensor_read(&values);
-            if (true == (values.calibrated[LINESENSOR_LEFT] && CALIB_OVER_LINE(values.value[LINESENSOR_LEFT])))
+            if (TRUE == (values.calibrated[LINESENSOR_LEFT] && CALIB_OVER_LINE(values.value[LINESENSOR_LEFT])))
             {
                 SoftTimer_restart(&gTimer);
                 gState = CALIBRATION_STATE_TURN_LEFT_UNTIL_RIGHT_SENSOR;
@@ -99,7 +100,7 @@ EventEnum CalibrateLineSensors_CalibrateSensors(void)
             }
 
             LineSensor_read(&values);
-            if (true == (values.calibrated[LINESENSOR_RIGHT] &&  CALIB_OVER_LINE(values.value[LINESENSOR_RIGHT])))
+            if (TRUE == (values.calibrated[LINESENSOR_RIGHT] &&  CALIB_OVER_LINE(values.value[LINESENSOR_RIGHT])))
             {
                 if (!LineSensor_getCalibrationState())
                 {
@@ -159,6 +160,8 @@ EventEnum CalibrateLineSensors_CalibrateSensors(void)
 
             gState = CALIBRATION_STATE_DONE;
             gResult = CALIBRATION_DONE;
+            break;
+        case CALIBRATION_STATE_DONE:
             break;
     }
     return gResult;

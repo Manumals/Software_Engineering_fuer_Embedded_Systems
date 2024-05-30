@@ -2,18 +2,16 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DriveToStart.c
+ * @file       InitializeMcu.h
  *
- *    Module handles driving to the startline 
+ *    Module initializes the microcomputingunit and its components
  */
 /**************************************************************************************************/
+#ifndef INITIALIZEMCU_H
+#define INITIALIZEMCU_H
 
 /* INCLUDES ***************************************************************************************/
-#include "DriveToStart.h"
-
-#include "DriverHandler.h"
-#include "LineSernsor.h"
-#include "Buzzer.h"
+#include "app/EventEnum.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -24,28 +22,18 @@
 /* PROTOTYPES *************************************************************************************/
 
 /* VARIABLES **************************************************************************************/
-static SoftTimer* gMaxTimeTimer;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void DriveToStart_StartMotorsAndTimer(void)
-{
+/** Initialize the microcontroller with all required variables and inits
+* entry functio of the state
+* @return INIZALIZATION_DONE : The initialization of the MCU is complete 
+*/
+extern EventEnum InitializeMcu_InitializeAll(void);
 
-}
+/** Display the team name on the Oled display 
+* exit functio of the state
+*/
+extern void InitializeMcu_DisplayTeamName(void);
 
-EventEnum DriveToStart_FollowGuideLine(void)
-{
-
-}
-
-void DriveToStart_StopTimer(void)
-{
-
-}
-
-SoftTimer* DriveToStart_StartTimerAndBeep(void)
-{
-  
-}
-
-/* INTERNAL FUNCTIONS *****************************************************************************/
+#endif /* INITIALIZEMCU_H */

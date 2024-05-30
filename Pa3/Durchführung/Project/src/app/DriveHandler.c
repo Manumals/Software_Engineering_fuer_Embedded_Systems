@@ -11,12 +11,15 @@
 /* INCLUDES ***************************************************************************************/
 #include "DriveHandler.h"
 
-#include "sevice/DriverControl.h"
+#include "Common/Types.h"
+#include "service/DriveControl.h"
 #include "State/SetParameters.h"
+#include "State/CalibrateLineSensors.h"
 
 /* CONSTANTS **************************************************************************************/
 #define OPTIMAL_POS 2000
 #define SENSOR_WEIGHT_SCALE (1000u)
+
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
@@ -50,19 +53,23 @@ static void regulateSpeed(Int32 posError, UInt16 * leftSpeed, UInt16 * rightSpee
 
 /* VARIABLES **************************************************************************************/
 UInt32 gCurrentPos = OPTIMAL_POS;
+UInt32 gLastPosition = OPTIMAL_POS;
 UInt16 gLeftSpeed, gRightSpeed;
+Int16 gLastError = 0;
+
+
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
 void DriveHandler_StopDriving(void)
 {
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gParam->maxMotorSpeed, DRIVE_CONTROL_FORWARD);
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gParam->maxMotorSpeed, DRIVE_CONTROL_FORWARD);  
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, 0, DRIVE_CONTROL_FORWARD);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, 0, DRIVE_CONTROL_FORWARD);
 }
 
 void DriveHandler_FindGuideLine(void)
 {
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, , DRIVE_CONTROL_FORWARD);
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, 0, DRIVE_CONTROL_FORWARD);   
+//Todo:    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gParam->maxMotorSpeed, DRIVE_CONTROL_FORWARD);
+//Todo:    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gParam->maxMotorSpeed, DRIVE_CONTROL_FORWARD);  
 }
 
 void DriveHandler_FollowGuideLine(const LineSensorValues *sensorValues)
@@ -80,7 +87,7 @@ static UInt32 calculatePosition(const LineSensorValues *sensorValues)
     UInt32 position = 0u;
     UInt32 sum = 0u;
     UInt32 weight = 0u;
-    bool foundLine = false;
+    Bool foundLine = FALSE;
 
     for (UInt8 sensor = 0; sensor < LINESENSOR_COUNT; ++sensor)
     {
@@ -88,7 +95,7 @@ static UInt32 calculatePosition(const LineSensorValues *sensorValues)
 
         if (CALIB_OVER_LINE(val))
         {
-            foundLine = true;
+            foundLine = TRUE;
         }
 
         position += val * weight;
@@ -99,13 +106,13 @@ static UInt32 calculatePosition(const LineSensorValues *sensorValues)
 
     if (!foundLine)
     {
-        position = glastPostion;
+        position = gLastPosition;
     }
     else
     {
         /* build weighted average */
         position /= sum;
-        glastPostion = position;
+        gLastPosition = position;
     }
 
     return position;
@@ -114,13 +121,13 @@ static UInt32 calculatePosition(const LineSensorValues *sensorValues)
 static void regulateSpeed(Int32 error, UInt16 * leftSpeed, UInt16 * rightSpeed)
 {
     /* PID controller */
-    Int32 proportional = (error * gParam->proportional.numerator) / gParam->proportional.denominator;
-    Int32 derivative   = ((error - gLastError) * gParam->derivative.numerator) / gParam->derivative.denominator;
+    Int32 proportional = 0; //Todo:(error * gParam->proportional.numerator) / gParam->proportional.denominator;
+    Int32 derivative   = 0; //Todo:((error - gLastError) * gParam->derivative.numerator) / gParam->derivative.denominator;
     Int32 integral     = 0;  /* not needed */
     Int32 speedDifference = proportional + derivative + integral;
 
-    Int32 left = gParam->maxMotorSpeed + speedDifference;
-    Int32 right = gParam->maxMotorSpeed - speedDifference;
+    Int32 left = 0; //Todo: gParam->maxMotorSpeed + speedDifference;
+    Int32 right = 0; //Todo:gParam->maxMotorSpeed - speedDifference;
 
     if (left < 0)
     {
@@ -131,14 +138,14 @@ static void regulateSpeed(Int32 error, UInt16 * leftSpeed, UInt16 * rightSpeed)
         right = 0;
     }
 
-    if (left > gParam->maxMotorSpeed)
+    /*if (left > gParam->maxMotorSpeed)
     {
         left = gParam->maxMotorSpeed;
     }
     if (right > gParam->maxMotorSpeed)
     {
         right = gParam->maxMotorSpeed;
-    }
+    }*/
 
     *leftSpeed = left;
     *rightSpeed = right;

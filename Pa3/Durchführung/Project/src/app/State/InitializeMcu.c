@@ -2,17 +2,29 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DisplayCountdown.c
+ * @file       InitializeMcu.c
  *
- *    Module handles displaying the countdown on the OLED-display 
+ *    Module initializes the microcomputingunit and its components
  */
 /**************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-#include "DisplayCountdown.h"
+#include "InitializeMcu.h"
 
-#include "SoftTimer.h"
-#include "Display.h"
+#include "os/ErrorHandler.h"
+
+#include "hal/Pwm.h"
+#include "hal/Irq.h"
+#include "hal/TickTimer.h"
+#include "hal/GPIO.h"
+
+#include "service/Button.h"
+#include "service/Buzzer.h"
+#include "service/Display.h"
+#include "service/LED.h"
+#include "service/DriveControl.h"
+#include "service/LineSensor.h"
+
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
@@ -22,23 +34,35 @@
 /* PROTOTYPES *************************************************************************************/
 
 /* VARIABLES **************************************************************************************/
-static SoftTimer* gCountdownTimer;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void DisplayCountdown_StartCountdown(void)
+EventEnum InitializeMcu_InitializeAll(void)
 {
+  /* Initialize HAL modules */
+  if (GPIO_RET_OK != Gpio_init())
+  {
+    ErrorHandler_halt(ERRORHANDLER_STARTUP_INIT_FAIL);
+  }
+  Pwm_init();
+  TickTimer_init();
+  Irq_init();
+  /* Initialize Service modules */
+  Button_init();
+  LineSensor_init();
+  Display_init();
+  Buzzer_init();
+  DriveControl_init();
+  Led_init();
 
-}
+  return INIZALIZATION_DONE;
+} 
 
-EventEnum DisplayCountdown_DisplayCountdown(void)
+void InitializeMcu_DisplayTeamName(void)
 {
-
+  Display_clear();
+  Display_gotoxy(0,0);
+  const char teamName[] = "~~ o=o\\";
+  Display_write(teamName, 8);
 }
-
-void DisplayCountdown_StopCountdown(void)
-{
-
-}
-
 /* INTERNAL FUNCTIONS *****************************************************************************/

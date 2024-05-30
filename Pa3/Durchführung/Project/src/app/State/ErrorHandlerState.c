@@ -2,18 +2,19 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DisplayLapTime.h
+ * @file       ErrorHandlerState.c
  *
- *    Module handles displaying the time needed to complete one lap on the OLED display
- *    and stops the timer as well as the power to the motors 
+ *    Shows an error message on the display depending on the event
  */
 /**************************************************************************************************/
-#ifndef DISPLAYLAPTIME_H
-#define DISPLAYLAPTIME_H
 
 /* INCLUDES ***************************************************************************************/
-#include "SoftTimer.h"
-#include "EventEnum.h"
+#include "ErrorHandlerState.h"
+
+#include "app/DriveHandler.h"
+#include "service/Buzzer.h"
+#include "os/ErrorHandler.h"
+
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
@@ -26,17 +27,14 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Stop the lapTime timer, the power to the motors and emits a short beep
- * entry function of the state
- * @param[in] lapTimer The lap timer with the completed lap time
- * @return POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED : The power to the motors was cut
-*/
-extern EventEnum DisplayLapTime_StopAfterLap(SoftTimer* lapTimer);
+void ErrorHandlerState_CallErrorHandler(EventEnum errorReason)
+{
 
-/** Display the laptime on the OLED-display
-* exit function of the state
-*/
-extern void DisplayLapTime_DisplayLapTime(void);
+}
 
-#endif /* DISPLAYLAPTIME_H */
+void ErrorHandlerState_WaitForReset(void)
+{
 
+}
+
+/* INTERNAL FUNCTIONS *****************************************************************************/

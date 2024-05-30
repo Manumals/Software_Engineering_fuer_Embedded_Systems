@@ -2,16 +2,18 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DisplayCountdown.h
+ * @file       DriveOverGap.c
  *
- *    Module handles displaying the countdown on the display 
+ *    Module performs the necessary maneuvers to drive over a gap 
  */
 /**************************************************************************************************/
-#ifndef DISPLAYCOUNTDOWN_H
-#define DISPLAYCOUNTDOWN_H
 
 /* INCLUDES ***************************************************************************************/
-#include "EventEnum.h"
+#include "DriveOverGap.h"
+
+#include "app/DriveHandler.h"
+#include "service/LineSensor.h"
+
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
@@ -22,23 +24,18 @@
 
 /* VARIABLES **************************************************************************************/
 
+static UInt16 gEntryTime;
+
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Start the timer required for the 3-second countdown
-* entry function of the state
-*/ 
-extern void DisplayCountdown_StartCountdown(void);
+void DriveOverGap_SaveCurrentLapTime(SoftTimer* lapTimer)
+{
 
-/** Check the timer and show the remaining time on the display
-* do function of the state
-* @return COUNTDOWN_IS_FINISHED : The 3 second countdown has reached zero 
-* @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
-*/ 
-extern EventEnum DisplayCountdown_DisplayCountdown(void);
+}
 
-/** Stop the countdown timer
-* exit function of the state
-*/
-extern void DisplayCountdown_StopCountdown(void);
+EventEnum DriveOverGap_DriveOverGap(SoftTimer* lapTimer)
+{
+  
+}
 
-#endif /* DISPLAYCOUNTDOWN_H */
+/* INTERNAL FUNCTIONS *****************************************************************************/

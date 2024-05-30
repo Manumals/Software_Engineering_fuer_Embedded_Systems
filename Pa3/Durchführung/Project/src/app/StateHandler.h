@@ -2,38 +2,40 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DisplayLapTime.c
+ * @file       StateHandler.h
  *
- *    Module handles displaying the time needed to complete one lap on the OLED display
- *    and stops the timer as well as the power to the motors 
+ *    Decides which states are called next depending on the returned events  
  */
 /**************************************************************************************************/
+#ifndef STATEHANDLER_H
+#define STATEHANDLER_H
 
 /* INCLUDES ***************************************************************************************/
-#include "DisplayLapTime.h"
 
-#include "Display.h"
-#include "Buzzer.h"
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
+typedef enum 
+{
+  STATE_INIZALIZATION_MCU = 0,
+  STATE_CALIBRATE_LINE_SENSORS,
+  STATE_READY_TO_DRIVE,
+  STATE_DISPLAY_COUNTDOWN,
+  STATE_DRIVE_TO_START,
+  STATE_DRIVE_TO_FINISH,
+  STATE_DRIVE_OVER_GAP,
+  STATE_DISPLAY_LAP_TIME,
+  STATE_SET_PARAMETERS,
+  STATE_ERROR_HANDLER
+} StateEnum;
 /* PROTOTYPES *************************************************************************************/
-
-/* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum DisplayLapTime_StopAfterLap(SoftTimer* lapTimer)
-{
+/** Function that decides which state comes next
+*/
+extern void StateHandler_process(void);
 
-}
-
-void DisplayLapTime_DisplayLapTime(void)
-{
-  
-}
-
-/* INTERNAL FUNCTIONS *****************************************************************************/
+#endif /* STATEHANDLER_H */

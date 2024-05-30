@@ -2,16 +2,18 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       CalibrateLineSensors.h
+ * @file       DriveToStart.h
  *
- * Calibrates the five line sensors so that the line is recognized under the current light conditions
+ *    Module handles driving to the startline 
  */
 /**************************************************************************************************/
-#ifndef CALIBRATELINESENSORS_H
-#define CALIBRATELINESENSORS_H
+#ifndef DRIVETOSTART_H
+#define DRIVETOSTART_H
 
 /* INCLUDES ***************************************************************************************/
 #include "app/EventEnum.h"
+#include "os/SoftTimer.h"
+
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
@@ -20,19 +22,31 @@
 
 /* PROTOTYPES *************************************************************************************/
 
+/* VARIABLES **************************************************************************************/
+
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Initializes all variables that are needed for the calibration 
+/** Start the motors and the internal timer for the maximum time (10s)
 * entry function of the state
 */
-extern void CalibrateLineSensors_Initialize(void);
+extern void DriveToStart_StartMotorsAndTimer(void);
 
-/** Calibrates the five line sensors so that the line is recognized under the current light conditions 
+/** Follow the guide line to the start finish line
 * do function of the state
-* @return NO_EVENT_HAS_HAPPEND: Calibration is not completed yet
-* @return CALIBRATION_FAILED : Calibration failed
-* @return CALIBRATION_DONE : Calibration is complete
+* @return DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG : DriveToStart was active for more than 10 seconds
+* @return START_FINISH_LINE_WAS_RECOGINZED : The start finish line has been recognized
+* @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
 */
-extern EventEnum CalibrateLineSensors_CalibrateSensors(void);
+extern EventEnum DriveToStart_FollowGuideLine(void);
 
-#endif /*CALIBRATELINESENSORS_H*/
+/** Stop the timer
+* exit function of the state
+*/
+extern void DriveToStart_StopTimer(void);
+
+/** Start the lapTimer for the lap time and emit a short beep
+* @return Returns the lapTimer
+*/
+extern SoftTimer* DriveToStart_StartTimerAndBeep(void);
+
+#endif /* DRIVETOSTART_H */

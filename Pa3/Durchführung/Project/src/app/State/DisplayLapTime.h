@@ -2,18 +2,18 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DriveToStart.h
+ * @file       DisplayLapTime.h
  *
- *    Module handles driving to the startline 
+ *    Module handles displaying the time needed to complete one lap on the OLED display
+ *    and stops the timer as well as the power to the motors 
  */
 /**************************************************************************************************/
-#ifndef DRIVETOSTART_H
-#define DRIVETOSTART_H
+#ifndef DISPLAYLAPTIME_H
+#define DISPLAYLAPTIME_H
 
 /* INCLUDES ***************************************************************************************/
-#include "EventEnum.h"
-#include "SoftTimer.h"
-
+#include "os/SoftTimer.h"
+#include "app/EventEnum.h"
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
@@ -26,27 +26,17 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Start the motors and the internal timer for the maximum time (10s)
-* entry function of the state
+/** Stop the lapTime timer, the power to the motors and emits a short beep
+ * entry function of the state
+ * @param[in] lapTimer The lap timer with the completed lap time
+ * @return POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED : The power to the motors was cut
 */
-extern void DriveToStart_StartMotorsAndTimer(void);
+extern EventEnum DisplayLapTime_StopAfterLap(SoftTimer* lapTimer);
 
-/** Follow the guide line to the start finish line
-* do function of the state
-* @return DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG : DriveToStart was active for more than 10 seconds
-* @return START_FINISH_LINE_WAS_RECOGINZED : The start finish line has been recognized
-* @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
-*/
-extern EventEnum DriveToStart_FollowGuideLine(void);
-
-/** Stop the timer
+/** Display the laptime on the OLED-display
 * exit function of the state
 */
-extern void DriveToStart_StopTimer(void);
+extern void DisplayLapTime_DisplayLapTime(void);
 
-/** Start the lapTimer for the lap time and emit a short beep
-* @return Returns the lapTimer
-*/
-extern SoftTimer* DriveToStart_StartTimerAndBeep(void);
+#endif /* DISPLAYLAPTIME_H */
 
-#endif /* DRIVETOSTART_H */

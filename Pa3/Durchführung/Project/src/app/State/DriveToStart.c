@@ -2,17 +2,18 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DriveToFinish.c
+ * @file       DriveToStart.c
  *
- *    Module takes care of following the guide line 
+ *    Module handles driving to the startline 
  */
 /**************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-#include "DriveToFinish.h"
+#include "DriveToStart.h"
 
-#include "DriveHandler.h"
-#include "LineSensor.h"
+#include "app/DriveHandler.h"
+#include "service/LineSensor.h"
+#include "service/Buzzer.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -23,10 +24,26 @@
 /* PROTOTYPES *************************************************************************************/
 
 /* VARIABLES **************************************************************************************/
+static SoftTimer* gMaxTimeTimer;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum DriveToFinish_FollowGuideLine(SoftTimer* lapTimer)
+void DriveToStart_StartMotorsAndTimer(void)
+{
+
+}
+
+EventEnum DriveToStart_FollowGuideLine(void)
+{
+
+}
+
+void DriveToStart_StopTimer(void)
+{
+
+}
+
+SoftTimer* DriveToStart_StartTimerAndBeep(void)
 {
   
 }

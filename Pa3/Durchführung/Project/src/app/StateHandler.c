@@ -62,7 +62,7 @@ static void CalibrateLineSensorsEvent(EventEnum gCurrentEvent);
 static EventEnum gCurrentEvent = NO_EVENT_HAS_HAPPEND; 
 static StateEnum gCurrentState = STATE_INIZALIZATION_MCU; /**< First state when the MCU is started */
 static SoftTimer* gLapTimer;
-static bool gEntryDone = false;
+static Bool gEntryDone = FALSE;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
@@ -77,10 +77,10 @@ void StateHandler_process(void)
         break;
 
     case STATE_CALIBRATE_LINE_SENSORS:
-        if (false == gEntryDone)
+        if (FALSE == gEntryDone)
         {
-            gEntryDone = true;
-            gCurrentEvent = CalibrateLineSensors_Initialize(); /**< entry */
+            gEntryDone = TRUE;
+            CalibrateLineSensors_Initialize(); /**< entry */
         }
         gCurrentEvent = CalibrateLineSensors_CalibrateSensors();
         CalibrateLineSensorsEvent(gCurrentEvent); /**< do */
@@ -91,16 +91,16 @@ void StateHandler_process(void)
         ReadyToDriveEvent(gCurrentEvent); /**< do */
         break;
 
-    case STATE_SET_PARAMETERS
+    case STATE_SET_PARAMETERS:
         SetParameters_SetNextParamSet(); /**< entry */
         SetParameters_DisplayParamSet(); /**< exit */
         gCurrentState = STATE_READY_TO_DRIVE;
         break;
 
     case STATE_DISPLAY_COUNTDOWN:      
-        if (false == gEntryDone)
+        if (FALSE == gEntryDone)
         {
-            gEntryDone = true;
+            gEntryDone = TRUE;
             DisplayCountdown_StartCountdown(); /**< entry */
         }
         gCurrentEvent = DisplayCountdown_DisplayCountdown();
@@ -108,9 +108,9 @@ void StateHandler_process(void)
         break;
 
     case STATE_DRIVE_TO_START:        
-        if (false == gEntryDone)
+        if (FALSE == gEntryDone)
         {
-          gEntryDone = true;
+          gEntryDone = TRUE;
           DriveToStart_StartMotorsAndTimer(); /**< entry */
         }
         gCurrentEvent = DriveToStart_FollowGuideLine();
@@ -123,18 +123,18 @@ void StateHandler_process(void)
       break;
 
     case STATE_ERROR_HANDLER:
-        if (false == gEntryDone)
+        if (FALSE == gEntryDone)
         {
-            gEntryDone = true;
+            gEntryDone = TRUE;
             ErrorHandlerState_CallErrorHandler(gCurrentEvent); /**< entry */
         }
         ErrorHandlerState_WaitForReset(); /**< do */
         break;
 
     case STATE_DRIVE_OVER_GAP:
-        if (false == gEntryDone)
+        if (FALSE == gEntryDone)
         {
-            gEntryDone = true;
+            gEntryDone = TRUE;
             DriveOverGap_SaveCurrentLapTime(gLapTimer); /**< entry */
         }
         gCurrentEvent = DriveOverGap_DriveOverGap(gLapTimer);
@@ -142,7 +142,7 @@ void StateHandler_process(void)
         break;
 
     case STATE_DISPLAY_LAP_TIME:
-        gCurrentEvent = DisplayLapTime_StopAfterLap(); /**< entry */
+        gCurrentEvent = DisplayLapTime_StopAfterLap(gLapTimer); /**< entry */
         if (POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED == gCurrentEvent)
         {
             DisplayLapTime_DisplayLapTime(); /**< exit */
@@ -160,13 +160,13 @@ static void DriveToStartEvent(EventEnum gCurrentEvent)
     if (DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG == gCurrentEvent)
         {
             gCurrentState = STATE_ERROR_HANDLER;
-            gEntryDone = false;
+            gEntryDone = FALSE;
             DriveToStart_StopTimer(); /**< exit */
         }
         else if (START_FINISH_LINE_WAS_RECOGINZED == gCurrentEvent)
         {
             gCurrentState = STATE_DRIVE_TO_FINISH;
-            gEntryDone = false;
+            gEntryDone = FALSE;
             DriveToStart_StopTimer(); /**< exit */
             gLapTimer = DriveToStart_StartTimerAndBeep(); /**< State drive to finish is next */
         }
@@ -202,12 +202,12 @@ static void DriveOverGapEvent(EventEnum gCurrentEvent)
     if (THE_GUIDELINE_WAS_RECOGNIZED == gCurrentEvent)
     {
         gCurrentState = STATE_DRIVE_TO_FINISH;
-        gEntryDone = false;
+        gEntryDone = FALSE;
     } 
     else if (DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG == gCurrentEvent)
     {
         gCurrentState = STATE_ERROR_HANDLER;
-        gEntryDone = false;
+        gEntryDone = FALSE;
     }
     else
     {
@@ -219,7 +219,7 @@ static void DisplayCountDownEvent(EventEnum gCurrentEvent)
 {
     if (COUNTDOWN_IS_FINISHED == gCurrentEvent)
     {
-        gEntryDone = false;
+        gEntryDone = FALSE;
         DisplayCountdown_StopCountdown(); /**< exit */
         gCurrentState = STATE_DRIVE_TO_START;
     }
@@ -256,12 +256,12 @@ static void CalibrateLineSensorsEvent(EventEnum gCurrentEvent)
     switch (gCurrentEvent)
     {
     case CALIBRATION_FAILED:
-        gEntryDone = false;
+        gEntryDone = FALSE;
         gCurrentState = STATE_ERROR_HANDLER;
         break;
 
     case CALIBRATION_DONE:
-        gEntryDone = false;
+        gEntryDone = FALSE;
         gCurrentState = STATE_READY_TO_DRIVE;
         break;
 

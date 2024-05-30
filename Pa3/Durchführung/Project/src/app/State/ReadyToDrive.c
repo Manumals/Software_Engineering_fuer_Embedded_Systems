@@ -2,28 +2,17 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       InitializeMcu.c
+ * @file       ReadyToDrive.c
  *
- *    Module initializes the microcomputingunit and its components
+ *    Robot is ready to drive and is waiting for user input
  */
 /**************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-#include "InitializeMcu.h"
+#include "ReadyToDrive.h"
 
-#include "os/ErrorHandler.h"
-
-#include "hal/PWM.h"
-#include "hal/IRQ.h"
-#include "hal/TickTimer.h"
-#include "hal/GPIO.h"
-
-#include "service/Button.h"
-#include "service/Buzzer.h"
 #include "service/Display.h"
-#include "service/LED.h"
-#include "service/DriveControl.h"
-#include "service/LineSensor.h"
+#include "service/Button.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -33,36 +22,46 @@
 
 /* PROTOTYPES *************************************************************************************/
 
+static bool WasButtonPressed(ButtonID);
+
 /* VARIABLES **************************************************************************************/
+
+static ButtonState lastState = BUTTON_STATE_UNKNOWN;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum InitializeMcu_InitializeAll(void)
+EventEnum ReadyToDrive_CheckStateOfButtons(void)
 {
-  /* Initialize HAL modules */
-  if (GPIO_RET_OK != Gpio_init())
-  {
-    ErrorHandler_halt(ERRORHANDLER_STARTUP_INIT_FAIL);
-  }
-  Pwm_init();
-  Tick_Timer_init();
-  Irq_init();
-  /* Initialize Service modules */
-  Button_init();
-  LineSensor_init();
-  Display_init();
-  Buzzer_init();
-  DriveControl_init(vid);
-  LED_init();
+    EventEnum retEvent = NO_EVENT_HAS_HAPPEND;
 
-  return INIZALIZATION_DONE;
-} 
-
-void InitializeMcu_DisplayTeamName(void)
-{
-  Display_clear();
-  Display_gotoxy(0,0);
-  const char teamName[] = "~~ o=o\\";
-  Display_write(teamName);
+    if (TRUE == WasButtonPressed(BUTTON_ID_A))
+    {
+        retEvent = START_BUTTON_HAS_BEEN_RELEASED;
+    }
+    else if (TRUE == WasButtonPressed(BUTTON_ID_B))
+    {
+        retEvent = PARAM_BUTTON_HAS_BEEN_RELEASED;
+    }
+    else if (TRUE == WasButtonPressed(BUTTON_ID_C))
+    {
+        retEvent = CALIBRATION_BUTTON_HAS_BEEN_RELEASED;  
+    }
+    
+    return retEvent;
 }
 /* INTERNAL FUNCTIONS *****************************************************************************/
+
+bool WasButtonPressed(ButtonID ID)
+{
+    bool retBool = FALSE;
+
+    ButtonState activeState = Button_getState(ID);
+    
+    if (BUTTON_STATE_PRESSED == lastState && BUTTON_STATE_RELEASED == activeState)
+    {
+        retBool = TRUE;
+    }
+    lastState = activeState;
+
+    return retBool;
+}

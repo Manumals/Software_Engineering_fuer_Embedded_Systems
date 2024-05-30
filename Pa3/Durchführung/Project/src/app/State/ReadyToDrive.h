@@ -2,47 +2,34 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       EventEnum.h
+ * @file       ReadyToDrive.h
  *
- *    All possible events that can occur in the states 
+ *    Robot is ready to drive and is waiting for user input
  */
 /**************************************************************************************************/
-#ifndef EVENTENUM_H
-#define EVENTENUM_H
+#ifndef READYTODRIVE_H
+#define READYTODRIVE_H
 
 /* INCLUDES ***************************************************************************************/
+#include "app/EventEnum.h"
 
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-/** Enum for all events that are needed for the normal function of the state handler
-*/
-typedef enum
-{
-  NO_EVENT_HAS_HAPPEND = 0,
-  /** Normal events */
-  INIZALIZATION_DONE,
-  CALIBRATION_DONE,
-  COUNTDOWN_IS_FINISHED,
-  POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED,
-  START_BUTTON_HAS_BEEN_RELEASED,
-  CALIBRATION_BUTTON_HAS_BEEN_RELEASED,
-  PARAM_BUTTON_HAS_BEEN_RELEASED,
-  START_FINISH_LINE_WAS_RECOGINZED,
-  THE_GUIDELINE_WAS_RECOGNIZED,
-  /** Errors */
-  INIZALIZATION_FAILED,
-  GUIDELINE_WAS_LOST,
-  LAPTIME_IS_TOO_LONG,
-  DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG,
-  DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG
-} EventEnum;
 
 /* PROTOTYPES *************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
+/** Wait for input from the user
+* do function of the state
+* @return CALIBRATION_BUTTON_HAS_BEEN_RELEASED : The line sensors are calibrated again
+* @return PARAM_BUTTON_HAS_BEEN_RELEASED : A new parameter set is selected
+* @return START_BUTTON_HAS_BEEN_RELEASED : Start the countdown
+* @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
+*/
+extern EventEnum ReadyToDrive_CheckStateOfButtons(void);
 
-#endif /* EVENTENUM_H */
+#endif /* READYTODRIVE_H */

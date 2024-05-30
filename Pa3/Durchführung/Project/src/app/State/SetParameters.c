@@ -2,15 +2,18 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       DriveHandler.h
+ * @file       SetParameters.c
  *
- *    Module takes care of all driving functions
+ *    Module handles setting of parametersets and returns the currently selected parameter set on request
  */
 /**************************************************************************************************/
-#ifndef DRIVEHANDLER_H
-#define DRIVEHANDLER_H
 
 /* INCLUDES ***************************************************************************************/
+#include "SetParameters.h"
+
+#include "service/Display.h"
+#include "os/SoftTimer.h"
+#include "app/EventEnum.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -19,23 +22,45 @@
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
+/** Switch to the next paramSet. If the last paramSet was active, activate the first paramSet
+ * @return nothing
+*/
+static void nextParamSet(void);
+
+/** Display the index of the current paramSet on the oled display
+ * @return nothing
+*/
+static void displayParamSetIdx(void);
 
 /* VARIABLES **************************************************************************************/
+static UInt8 gParamSetIdx;           /** internal parametersetindex*/
+static ParamSet gParamSetArray[3];    /** array of parameterset, access via gParamSetIdx*/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Stop both driving motors
-*/
-extern void DriveHandler_StopDriving(void);
+void SetParameters_SetNextParamSet(void)
+{
 
-/** Travel straight ahead at the maximum specified speed to find the new guide line
-*/
-extern void DriveHandler_FindGuideLine(void);
+}
 
-/** Follow the guide line according to the transferred line sensor values
-*
-* @param[in] sensorValues Array with the five line sensor values
-*/
-extern void DriveHandler_FollowGuideLine(const LineSensorValues *sensorValues);
+void SetParameters_DisplayParamSet(void)
+{
+  
+}
 
-#endif /* DRIVEHANDLER_H */
+ParamSet SetParameters_getCurrentParamSet(void)
+{
+
+}
+
+/* INTERNAL FUNCTIONS *****************************************************************************/
+
+static void nextParamSet(void)
+{
+
+}
+
+static void displayParamSetIdx(void)
+{
+
+}

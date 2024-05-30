@@ -2,38 +2,46 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       ErrorHandlerState.h
+ * @file       SetParameters.h
  *
- *    Shows an error message on the display depending on the event
+ *    Module handles setting of parametersets and returns the currently selected parameter set on request
  */
 /**************************************************************************************************/
-#ifndef ERRORHANDLERSTATE_H
-#define ERRORHANDLERSTATE_H
+#ifndef SETPARAMETERS_H
+#define SETPARAMETERS_H
+#include "Common/Types.h"
 
 /* INCLUDES ***************************************************************************************/
-#include "EventEnum.h"
 
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
+typedef struct tag_ParamSet
+{
+  UInt8 maxSpeed;
+  UInt8 minCurveRadius;
+} ParamSet;
 
 /* PROTOTYPES *************************************************************************************/
 
-/* VARIABLES **************************************************************************************/
-
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Convert the event into an error code and output it via the ErrorHandler on the display
+/** Cycle to the next parameter set
 * entry function of the state
-* @param[in] errorReason The event that triggered the error
 */
-extern void ErrorHandlerState_CallErrorHandler(EventEnum errorReason);
+extern void SetParameters_SetNextParamSet(void);
 
-/** Wait for the user to reset the microcontroller
-* do function of the state
+/** Display the current parameter set
+* exit function of the state
 */
-extern void ErrorHandlerState_WaitForReset(void);
+extern void SetParameters_DisplayParamSet(void);
 
-#endif /* ERRORHANDLERSTATE_H */
+/** Returns the current parameter set
+*
+* @return Current parameter set
+*/
+extern ParamSet SetParameters_getCurrentParamSet(void);
+
+#endif /* SETPARAMETERS_H */

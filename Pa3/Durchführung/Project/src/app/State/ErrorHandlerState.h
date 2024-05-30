@@ -2,45 +2,38 @@
   (c) NewTec GmbH 2024   -   www.newtec.de
 ***************************************************************************************************/
 /**
- * @file       SetParameters.h
+ * @file       ErrorHandlerState.h
  *
- *    Module handles setting of parametersets and returns the currently selected parameter set on request
+ *    Shows an error message on the display depending on the event
  */
 /**************************************************************************************************/
-#ifndef SETPARAMETERS_H
-#define SETPARAMETERS_H
+#ifndef ERRORHANDLERSTATE_H
+#define ERRORHANDLERSTATE_H
 
 /* INCLUDES ***************************************************************************************/
+#include "app/EventEnum.h"
 
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-typedef struct tag_ParamSet
-{
-  UInt8 maxSpeed;
-  UInt8 minCurveRadius;
-} ParamSet;
 
 /* PROTOTYPES *************************************************************************************/
 
+/* VARIABLES **************************************************************************************/
+
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-/** Cycle to the next parameter set
+/** Convert the event into an error code and output it via the ErrorHandler on the display
 * entry function of the state
+* @param[in] errorReason The event that triggered the error
 */
-extern void SetParameters_SetNextParamSet(void);
+extern void ErrorHandlerState_CallErrorHandler(EventEnum errorReason);
 
-/** Display the current parameter set
-* exit function of the state
+/** Wait for the user to reset the microcontroller
+* do function of the state
 */
-extern void SetParameters_DisplayParamSet(void);
+extern void ErrorHandlerState_WaitForReset(void);
 
-/** Returns the current parameter set
-*
-* @return Current parameter set
-*/
-extern ParamSet SetParameters_getCurrentParamSet(void);
-
-#endif /* SETPARAMETERS_H */
+#endif /* ERRORHANDLERSTATE_H */
