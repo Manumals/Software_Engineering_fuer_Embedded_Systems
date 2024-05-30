@@ -16,6 +16,7 @@
 
 /* CONSTANTS **************************************************************************************/
 #define STATE_IS_ACTIVE_FOR_TOO_LONG 5000
+#define SENSOR_THRESHOLD 500
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
@@ -38,19 +39,23 @@ EventEnum DriveOverGap_DriveOverGap(SoftTimer* lapTimer)
     DriveHandler_FindGuideLine();
 
     EventEnum returnEnum = NO_EVENT_HAS_HAPPEND;
-    LineSensorValues* sensorValues;
-    LineSensor_read(sensorValues);
+    LineSensorValues sensorValues;
+    LineSensor_read(&sensorValues);
 
     for (UInt8 counterSensors = 0; counterSensors < 3; counterSensors++)
     {   
-        if (500 < sensorValues->value[counterSensors])
+        if (SENSOR_THRESHOLD < sensorValues.value[counterSensors])
         {
             returnEnum = THE_GUIDELINE_WAS_RECOGNIZED;
             counterSensors = 3; /** Stop loop*/
         }
     }
 
-    if (STATE_IS_ACTIVE_FOR_TOO_LONG >= (gEntryTime - SoftTimer_get(lapTimer)))
+    if (SOFTTIMER_IS_EXPIRED(lapTimer))
+    {
+        returnEnum = LAPTIME_IS_TOO_LONG;
+    }
+    else if (STATE_IS_ACTIVE_FOR_TOO_LONG >= (gEntryTime - SoftTimer_get(lapTimer)))
     {
         returnEnum = DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG;
     }
