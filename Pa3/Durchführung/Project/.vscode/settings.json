@@ -1,6 +1,6 @@
 {
     "files.associations": {
-     "eventenum.h": "c"
-
+    "buzzer.h": "c"
+    "eventenum.h": "c"
     }
 }

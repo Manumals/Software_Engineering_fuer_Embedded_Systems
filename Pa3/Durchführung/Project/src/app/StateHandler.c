@@ -123,12 +123,7 @@ void StateHandler_process(void)
       break;
 
     case STATE_ERROR_HANDLER:
-        if (FALSE == gEntryDone)
-        {
-            gEntryDone = TRUE;
-            ErrorHandlerState_CallErrorHandler(gCurrentEvent); /**< entry */
-        }
-        ErrorHandlerState_WaitForReset(); /**< do */
+        ErrorHandlerState_CallErrorHandler(gCurrentEvent); /**< entry */
         break;
 
     case STATE_DRIVE_OVER_GAP:
@@ -145,7 +140,7 @@ void StateHandler_process(void)
         gCurrentEvent = DisplayLapTime_StopAfterLap(gLapTimer); /**< entry */
         if (POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED == gCurrentEvent)
         {
-            DisplayLapTime_DisplayLapTime(); /**< exit */
+            DisplayLapTime_DisplayLapTime(gLapTimer); /**< exit */
         }
         break;
 
