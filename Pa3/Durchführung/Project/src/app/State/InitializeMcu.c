@@ -37,7 +37,7 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum InitializeMcu_InitializeAll(void)
+EventEnum InitializeMcu_initializeAll(void)
 {
   /* Initialize HAL modules */
   if (GPIO_RET_OK != Gpio_init())
@@ -58,7 +58,7 @@ EventEnum InitializeMcu_InitializeAll(void)
   return INIZALIZATION_DONE;
 } 
 
-void InitializeMcu_DisplayTeamName(void)
+void InitializeMcu_displayTeamName(void)
 {
   Display_clear();
   Display_gotoxy(0,0);

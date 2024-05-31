@@ -17,8 +17,8 @@
 #include "State/CalibrateLineSensors.h"
 
 /* CONSTANTS **************************************************************************************/
-#define OPTIMAL_POS (2000)
-#define SENSOR_WEIGHT_SCALE (1000u)
+#define OPTIMAL_POS (2000U)
+#define SENSOR_WEIGHT_SCALE (1000U)
 
 /* MACROS *****************************************************************************************/
 
@@ -60,20 +60,20 @@ Int16 gLastError = 0;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void DriveHandler_StopDriving(void)
+void DriveHandler_stopDriving(void)
 {
     DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, 0, DRIVE_CONTROL_FORWARD);
     DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, 0, DRIVE_CONTROL_FORWARD);
 }
 
-void DriveHandler_FindGuideLine(void)
+void DriveHandler_findGuideLine(void)
 {
     ParamSet gParam = SetParameters_getCurrentParamSet();
     DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gParam.maxMotorSpeed, DRIVE_CONTROL_FORWARD);
     DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gParam.maxMotorSpeed, DRIVE_CONTROL_FORWARD);  
 }
 
-void DriveHandler_FollowGuideLine(const LineSensorValues *sensorValues)
+void DriveHandler_followGuideLine(const LineSensorValues *sensorValues)
 {
     gCurrentPos = calculatePosition(sensorValues);
     regulateSpeed(gCurrentPos - OPTIMAL_POS, &gLeftSpeed, &gRightSpeed);

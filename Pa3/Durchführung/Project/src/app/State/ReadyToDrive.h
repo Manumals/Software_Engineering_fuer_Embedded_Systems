@@ -30,6 +30,6 @@
 * @return START_BUTTON_HAS_BEEN_RELEASED : Start the countdown
 * @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
 */
-extern EventEnum ReadyToDrive_CheckStateOfButtons(void);
+extern EventEnum ReadyToDrive_checkStateOfButtons(void);
 
 #endif /* READYTODRIVE_H */

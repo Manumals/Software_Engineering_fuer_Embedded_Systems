@@ -16,10 +16,10 @@
 #include "service/Buzzer.h"
 
 /* CONSTANTS **************************************************************************************/
-#define MAX_START_TIME_s (10U)
-#define MAX_LAP_TIME_s (20U)
+#define MAX_START_TIME_MS (10000U)
+#define MAX_LAP_TIME_MS (20000U)
 
-#define TRESHOLD_LINE_RECOGNIZED 500
+#define TRESHOLD_LINE_RECOGNIZED (500U)
 
 /* MACROS *****************************************************************************************/
 
@@ -35,14 +35,14 @@ LineSensorValues sensorValues;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void DriveToStart_StartMotorsAndTimer(void)
+void DriveToStart_startMotorsAndTimer(void)
 {
     SoftTimer_Ret status = SOFTTIMER_RET_UNKNOWNTIMER;
 
     LineSensor_read(&sensorValues);
     SoftTimer_init(&gMaxTimeTimer);
 
-    DriveHandler_FollowGuideLine(&sensorValues);
+    DriveHandler_followGuideLine(&sensorValues);
 
     if (SOFT_TIMER_UNREGISTERED == gMaxTimeTimer.state)
     {
@@ -50,11 +50,11 @@ void DriveToStart_StartMotorsAndTimer(void)
     }
     if (SOFTTIMER_RET_SUCCESS == status)
     {
-        SoftTimer_start(&gMaxTimeTimer, MAX_START_TIME_s);
+        SoftTimer_start(&gMaxTimeTimer, MAX_START_TIME_MS);
     }
 }
 
-EventEnum DriveToStart_FollowGuideLine(void)
+EventEnum DriveToStart_followGuideLine(void)
 {
     EventEnum retEvent = NO_EVENT_HAS_HAPPEND;
 
@@ -72,13 +72,13 @@ EventEnum DriveToStart_FollowGuideLine(void)
     return retEvent;
 }
 
-void DriveToStart_StopTimer(void)
+void DriveToStart_stopTimer(void)
 {
     SoftTimer_Stop(&gMaxTimeTimer);
     SoftTimerHandler_unRegister(&gMaxTimeTimer);
 }
 
-SoftTimer* DriveToStart_StartTimerAndBeep(void)
+SoftTimer* DriveToStart_startTimerAndBeep(void)
 {
     SoftTimer_Ret status = SOFTTIMER_RET_UNKNOWNTIMER;
     SoftTimer* retTimer;
@@ -92,7 +92,7 @@ SoftTimer* DriveToStart_StartTimerAndBeep(void)
     }
     if (SOFTTIMER_RET_SUCCESS == status)
     {
-        SoftTimer_start(&gLapTimer, MAX_LAP_TIME_s);
+        SoftTimer_start(&gLapTimer, MAX_LAP_TIME_MS);
         retTimer = &gLapTimer;
     }
 

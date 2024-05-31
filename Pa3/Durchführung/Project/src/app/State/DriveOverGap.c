@@ -29,14 +29,14 @@ static UInt16 gEntryTime;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void DriveOverGap_SaveCurrentLapTime(SoftTimer* lapTimer)
+void DriveOverGap_saveCurrentLapTime(SoftTimer* lapTimer)
 {
     gEntryTime = SoftTimer_get(lapTimer);
 }
 
-EventEnum DriveOverGap_DriveOverGap(SoftTimer* lapTimer)
+EventEnum DriveOverGap_driveOverGap(SoftTimer* lapTimer)
 {
-    DriveHandler_FindGuideLine();
+    DriveHandler_findGuideLine();
 
     EventEnum returnEnum = NO_EVENT_HAS_HAPPEND;
     LineSensorValues sensorValues;

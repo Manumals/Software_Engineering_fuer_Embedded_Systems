@@ -22,7 +22,7 @@
 
 /* PROTOTYPES *************************************************************************************/
 
-static bool WasButtonPressed(ButtonID);
+static bool wasButtonPressed(ButtonID);
 
 /* VARIABLES **************************************************************************************/
 
@@ -30,19 +30,19 @@ static ButtonState lastState = BUTTON_STATE_UNKNOWN;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum ReadyToDrive_CheckStateOfButtons(void)
+EventEnum ReadyToDrive_checkStateOfButtons(void)
 {
     EventEnum retEvent = NO_EVENT_HAS_HAPPEND;
 
-    if (TRUE == WasButtonPressed(BUTTON_ID_A))
+    if (TRUE == wasButtonPressed(BUTTON_ID_A))
     {
         retEvent = START_BUTTON_HAS_BEEN_RELEASED;
     }
-    else if (TRUE == WasButtonPressed(BUTTON_ID_B))
+    else if (TRUE == wasButtonPressed(BUTTON_ID_B))
     {
         retEvent = PARAM_BUTTON_HAS_BEEN_RELEASED;
     }
-    else if (TRUE == WasButtonPressed(BUTTON_ID_C))
+    else if (TRUE == wasButtonPressed(BUTTON_ID_C))
     {
         retEvent = CALIBRATION_BUTTON_HAS_BEEN_RELEASED;  
     }
@@ -51,7 +51,7 @@ EventEnum ReadyToDrive_CheckStateOfButtons(void)
 }
 /* INTERNAL FUNCTIONS *****************************************************************************/
 
-bool WasButtonPressed(ButtonID ID)
+bool wasButtonPressed(ButtonID ID)
 {
     bool retBool = FALSE;
 

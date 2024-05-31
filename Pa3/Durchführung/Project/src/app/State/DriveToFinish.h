@@ -35,6 +35,6 @@
  * @return LAPTIME_IS_TOO_LONG : LapTimer is greater than 20 seconds (error)
  * @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
 */ 
-extern EventEnum DriveToFinish_FollowGuideLine(SoftTimer* lapTimer);
+extern EventEnum DriveToFinish_followGuideLine(SoftTimer* lapTimer);
 
 #endif /* DRIVETOFINSIH_H */

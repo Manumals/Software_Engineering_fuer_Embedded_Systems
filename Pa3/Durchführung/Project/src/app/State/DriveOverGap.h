@@ -30,7 +30,7 @@
 * entry function of the state
 * @param[in] lapTimer The lap timer with the current lap time
 */
-extern void DriveOverGap_SaveCurrentLapTime(SoftTimer* lapTimer);
+extern void DriveOverGap_saveCurrentLapTime(SoftTimer* lapTimer);
 
 /** Drive algorithm to drive over a gap, drive straight ahead at full throttle until the guide line is recognized again
 * do function of the state
@@ -41,6 +41,6 @@ extern void DriveOverGap_SaveCurrentLapTime(SoftTimer* lapTimer);
 * @return DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG : State was active for more than 5 seconds (error)
 * @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
 */
-extern EventEnum DriveOverGap_DriveOverGap(SoftTimer* lapTimer);
+extern EventEnum DriveOverGap_driveOverGap(SoftTimer* lapTimer);
 
 #endif /* DRIVEOVERGAP_H */

@@ -28,18 +28,18 @@
 /** Start the timer required for the 3-second countdown
 * entry function of the state
 */ 
-extern void DisplayCountdown_StartCountdown(void);
+extern void DisplayCountdown_startCountdown(void);
 
 /** Check the timer and show the remaining time on the display
 * do function of the state
 * @return COUNTDOWN_IS_FINISHED : The 3 second countdown has reached zero 
 * @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
 */ 
-extern EventEnum DisplayCountdown_DisplayCountdown(void);
+extern EventEnum DisplayCountdown_displayCountdown(void);
 
 /** Stop the countdown timer
 * exit function of the state
 */
-extern void DisplayCountdown_StopCountdown(void);
+extern void DisplayCountdown_stopCountdown(void);
 
 #endif /* DISPLAYCOUNTDOWN_H */

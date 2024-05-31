@@ -29,11 +29,11 @@
 * entry functio of the state
 * @return INIZALIZATION_DONE : The initialization of the MCU is complete 
 */
-extern EventEnum InitializeMcu_InitializeAll(void);
+extern EventEnum InitializeMcu_initializeAll(void);
 
 /** Display the team name on the Oled display 
 * exit functio of the state
 */
-extern void InitializeMcu_DisplayTeamName(void);
+extern void InitializeMcu_displayTeamName(void);
 
 #endif /* INITIALIZEMCU_H */

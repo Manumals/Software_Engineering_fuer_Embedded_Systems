@@ -29,6 +29,6 @@
 * entry function of the state
 * @param[in] errorReason The event that triggered the error
 */
-extern void ErrorHandlerState_CallErrorHandler(EventEnum errorReason);
+extern void ErrorHandlerState_callErrorHandler(EventEnum errorReason);
 
 #endif /* ERRORHANDLERSTATE_H */

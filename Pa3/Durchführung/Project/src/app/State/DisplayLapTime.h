@@ -31,12 +31,12 @@
  * @param[in] lapTimer The lap timer with the completed lap time
  * @return POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED : The power to the motors was cut
 */
-extern EventEnum DisplayLapTime_StopAfterLap(SoftTimer* lapTimer);
+extern EventEnum DisplayLapTime_stopAfterLap(SoftTimer* lapTimer);
 
 /** Display the laptime on the OLED-display
 * exit function of the state
 */
-extern void DisplayLapTime_DisplayLapTime(SoftTimer* lapTimer);
+extern void DisplayLapTime_displayLapTime(SoftTimer* lapTimer);
 
 #endif /* DISPLAYLAPTIME_H */
 

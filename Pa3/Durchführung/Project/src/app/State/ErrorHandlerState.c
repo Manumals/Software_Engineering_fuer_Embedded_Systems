@@ -27,10 +27,10 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void ErrorHandlerState_CallErrorHandler(EventEnum errorReason)
+void ErrorHandlerState_callErrorHandler(EventEnum errorReason)
 {
     /* Stops the power supply to the DriveMotors */
-    DriveHandler_StopDriving();
+    DriveHandler_stopDriving();
 
     /* The AlarmSignal is played on the Buzzer */
     Buzzer_beep(BUZZER_ALARM);

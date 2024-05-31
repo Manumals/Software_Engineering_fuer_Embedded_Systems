@@ -27,16 +27,16 @@
 
 /** Stop both driving motors
 */
-extern void DriveHandler_StopDriving(void);
+extern void DriveHandler_stopDriving(void);
 
 /** Travel straight ahead at the maximum specified speed to find the new guide line
 */
-extern void DriveHandler_FindGuideLine(void);
+extern void DriveHandler_findGuideLine(void);
 
 /** Follow the guide line according to the transferred line sensor values
 *
 * @param[in] sensorValues Array with the five line sensor values
 */
-extern void DriveHandler_FollowGuideLine(const LineSensorValues *sensorValues);
+extern void DriveHandler_followGuideLine(const LineSensorValues *sensorValues);
 
 #endif /* DRIVEHANDLER_H */

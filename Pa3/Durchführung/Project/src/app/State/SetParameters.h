@@ -34,12 +34,12 @@ typedef struct tag_ParamSet
 /** Cycle to the next parameter set
 * entry function of the state
 */
-extern void SetParameters_SetNextParamSet(void);
+extern void SetParameters_setNextParamSet(void);
 
 /** Display the current parameter set
 * exit function of the state
 */
-extern void SetParameters_DisplayParamSet(void);
+extern void SetParameters_displayParamSet(void);
 
 /** Returns the current parameter set
 *

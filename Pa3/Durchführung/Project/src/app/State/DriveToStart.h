@@ -30,7 +30,7 @@
 /** Start the motors and the internal timer for the maximum time (10s)
 * entry function of the state
 */
-extern void DriveToStart_StartMotorsAndTimer(void);
+extern void DriveToStart_startMotorsAndTimer(void);
 
 /** Follow the guide line to the start finish line
 * do function of the state
@@ -38,16 +38,16 @@ extern void DriveToStart_StartMotorsAndTimer(void);
 * @return START_FINISH_LINE_WAS_RECOGINZED : The start finish line has been recognized
 * @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
 */
-extern EventEnum DriveToStart_FollowGuideLine(void);
+extern EventEnum DriveToStart_followGuideLine(void);
 
 /** Stop the timer
 * exit function of the state
 */
-extern void DriveToStart_StopTimer(void);
+extern void DriveToStart_stopTimer(void);
 
 /** Start the lapTimer for the lap time and emit a short beep
 * @return Returns the lapTimer
 */
-extern SoftTimer* DriveToStart_StartTimerAndBeep(void);
+extern SoftTimer* DriveToStart_startTimerAndBeep(void);
 
 #endif /* DRIVETOSTART_H */

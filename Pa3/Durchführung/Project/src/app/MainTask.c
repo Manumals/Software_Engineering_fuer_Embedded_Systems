@@ -22,7 +22,7 @@ For a detailed description see the detailed description in @ref MainTask.h.
 #include "os/Task.h"
 #include "os/Scheduler.h"
 #include "service/Button.h"
-
+#include "app/StateHandler.h"
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
@@ -55,6 +55,7 @@ extern MainTask_Ret MainTask_init(void)
         if ( SCHEDULER_RET_SUCCESS == Scheduler_addTask(&gMainTask))
         {
             /* TODO: Add your application here. */
+            
         }
         else
         {
@@ -74,6 +75,7 @@ extern MainTask_Ret MainTask_init(void)
 static void mainTaskWork(void * data)
 {
     (void)data;
+    StateHandler_process();
 
     /* TODO: Add your application here. */
 }

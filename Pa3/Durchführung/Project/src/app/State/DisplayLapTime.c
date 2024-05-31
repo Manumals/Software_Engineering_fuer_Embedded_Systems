@@ -27,20 +27,20 @@
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-EventEnum DisplayLapTime_StopAfterLap(SoftTimer* lapTimer)
+EventEnum DisplayLapTime_stopAfterLap(SoftTimer* lapTimer)
 {
     //Todo: No proper error handling
     /* Stop the lapTime timer */
     SoftTimer_Stop(lapTimer);
 
     /* Stops the power supply to the DriveMotors */
-    DriveHandler_StopDriving();
+    DriveHandler_stopDriving();
 
     /* Emit a short beep */
     Buzzer_beep(BUZZER_NOTIFY);
 }
 
-void DisplayLapTime_DisplayLapTime(SoftTimer* lapTimer)
+void DisplayLapTime_displayLapTime(SoftTimer* lapTimer)
 {
     /* Shows the completed lap time on the OledDisplay */
     #define TIME_LEN_MAX (10)

@@ -52,12 +52,12 @@ static SoftTimer gTimer;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void CalibrateLineSensors_Initialize(void)
+void CalibrateLineSensors_initialize(void)
 {
     gState = CALIBRATION_STATE_INIT;
 }
 
-EventEnum CalibrateLineSensors_CalibrateSensors(void)
+EventEnum CalibrateLineSensors_calibrateSensors(void)
 {
     LineSensorValues values;
     gResult = NO_EVENT_HAS_HAPPEND;

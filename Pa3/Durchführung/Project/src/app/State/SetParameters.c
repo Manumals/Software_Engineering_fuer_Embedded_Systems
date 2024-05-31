@@ -31,7 +31,7 @@ static ParamSet gParamSetArray[ARRAY_SIZE] = {{255, 5, 5, 5 ,5},
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
-void SetParameters_SetNextParamSet(void)
+void SetParameters_setNextParamSet(void)
 {
     gParamSetIdx++;
   
@@ -41,7 +41,7 @@ void SetParameters_SetNextParamSet(void)
     }
 }
 
-void SetParameters_DisplayParamSet(void)
+void SetParameters_displayParamSet(void)
 {
     Display_gotoxy(0,3);
     Display_clearLine();
