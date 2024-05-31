@@ -16,51 +16,41 @@
 #include "app/EventEnum.h"
 
 /* CONSTANTS **************************************************************************************/
-
+#define OFFSET_FOR_CHAR (48)
+#define ARRAY_SIZE (3)
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
-/** Switch to the next paramSet. If the last paramSet was active, activate the first paramSet
- * @return nothing
-*/
-static void nextParamSet(void);
-
-/** Display the index of the current paramSet on the oled display
- * @return nothing
-*/
-static void displayParamSetIdx(void);
 
 /* VARIABLES **************************************************************************************/
-static UInt8 gParamSetIdx;           /** internal parametersetindex*/
-static ParamSet gParamSetArray[3];    /** array of parameterset, access via gParamSetIdx*/
+static UInt8 gParamSetIdx = 0;           /**< internal parametersetindex*/
+static ParamSet gParamSetArray[ARRAY_SIZE] = {{255, 5, 5, 5 ,5}, 
+{150, 3, 3, 3, 3}, {75, 1, 1, 1, 1}};    /**< array of parameterset, access via gParamSetIdx*/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
 
 void SetParameters_SetNextParamSet(void)
 {
-
+    gParamSetIdx++;
+  
+    if (ARRAY_SIZE <= gParamSetIdx)
+    {
+        gParamSetIdx = 0;
+    }
 }
 
 void SetParameters_DisplayParamSet(void)
 {
-  
+    Display_gotoxy(0,3);
+    Display_clearLine();
+    char indexString[16] = "Current Index ";
+    indexString[15] = OFFSET_FOR_CHAR + gParamSetIdx; /* Add the current index as a number */
+    Display_write(indexString, 16);
 }
 
 ParamSet SetParameters_getCurrentParamSet(void)
 {
-
-}
-
-/* INTERNAL FUNCTIONS *****************************************************************************/
-
-static void nextParamSet(void)
-{
-
-}
-
-static void displayParamSetIdx(void)
-{
-
+    return gParamSetArray[gParamSetIdx];
 }
