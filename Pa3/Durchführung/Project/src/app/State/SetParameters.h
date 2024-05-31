@@ -20,8 +20,11 @@
 /* TYPES ******************************************************************************************/
 typedef struct tag_ParamSet
 {
-  UInt8 maxSpeed;
-  UInt8 minCurveRadius;
+  UInt8 maxMotorSpeed;
+  UInt8 proNumerator;
+  UInt8 proDenominator;
+  UInt8 derNumerator;
+  UInt8 derDenominator;
 } ParamSet;
 
 /* PROTOTYPES *************************************************************************************/

@@ -68,8 +68,9 @@ void DriveHandler_StopDriving(void)
 
 void DriveHandler_FindGuideLine(void)
 {
-//Todo:    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gParam->maxMotorSpeed, DRIVE_CONTROL_FORWARD);
-//Todo:    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gParam->maxMotorSpeed, DRIVE_CONTROL_FORWARD);  
+    ParamSet gParam = SetParameters_getCurrentParamSet();
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gParam.maxMotorSpeed, DRIVE_CONTROL_FORWARD);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gParam.maxMotorSpeed, DRIVE_CONTROL_FORWARD);  
 }
 
 void DriveHandler_FollowGuideLine(const LineSensorValues *sensorValues)
@@ -78,7 +79,6 @@ void DriveHandler_FollowGuideLine(const LineSensorValues *sensorValues)
     regulateSpeed(gCurrentPos - OPTIMAL_POS, &gLeftSpeed, &gRightSpeed);
     DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gLeftSpeed, DRIVE_CONTROL_FORWARD);
     DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gRightSpeed, DRIVE_CONTROL_FORWARD);
-
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
@@ -120,9 +120,10 @@ static UInt32 calculatePosition(const LineSensorValues *sensorValues)
 
 static void regulateSpeed(Int32 error, UInt16 * leftSpeed, UInt16 * rightSpeed)
 {
+    ParamSet gParam = SetParameters_getCurrentParamSet();
     /* PID controller */
-    Int32 proportional = 0; //Todo:(error * gParam->proportional.numerator) / gParam->proportional.denominator;
-    Int32 derivative   = 0; //Todo:((error - gLastError) * gParam->derivative.numerator) / gParam->derivative.denominator;
+    Int32 proportional = (error * gParam.proNumerator) / gParam.proDenominator;
+    Int32 derivative   = ((error - gLastError) * gParam.derNumerator) / gParam.derDenominator;
     Int32 integral     = 0;  /* not needed */
     Int32 speedDifference = proportional + derivative + integral;
 
@@ -138,14 +139,14 @@ static void regulateSpeed(Int32 error, UInt16 * leftSpeed, UInt16 * rightSpeed)
         right = 0;
     }
 
-    /*if (left > gParam->maxMotorSpeed)
+    if (left > gParam.maxMotorSpeed)
     {
-        left = gParam->maxMotorSpeed;
+        left = gParam.maxMotorSpeed;
     }
-    if (right > gParam->maxMotorSpeed)
+    if (right > gParam.maxMotorSpeed)
     {
-        right = gParam->maxMotorSpeed;
-    }*/
+        right = gParam.maxMotorSpeed;
+    }
 
     *leftSpeed = left;
     *rightSpeed = right;
