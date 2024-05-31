@@ -15,8 +15,8 @@
 #include "service/LineSensor.h"
 
 /* CONSTANTS **************************************************************************************/
-#define STATE_IS_ACTIVE_FOR_TOO_LONG 5000
-#define SENSOR_THRESHOLD 500
+#define STATE_TIME_MAX_MS (5000)
+#define SENSOR_THRESHOLD (500)
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
@@ -47,7 +47,7 @@ EventEnum DriveOverGap_DriveOverGap(SoftTimer* lapTimer)
         if (SENSOR_THRESHOLD < sensorValues.value[counterSensors])
         {
             returnEnum = THE_GUIDELINE_WAS_RECOGNIZED;
-            counterSensors = 3; /** Stop loop*/
+            counterSensors = 3; /* Stop loop*/
         }
     }
 
@@ -55,7 +55,7 @@ EventEnum DriveOverGap_DriveOverGap(SoftTimer* lapTimer)
     {
         returnEnum = LAPTIME_IS_TOO_LONG;
     }
-    else if (STATE_IS_ACTIVE_FOR_TOO_LONG >= (gEntryTime - SoftTimer_get(lapTimer)))
+    else if (STATE_TIME_MAX_MS >= (gEntryTime - SoftTimer_get(lapTimer)))
     {
         returnEnum = DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG;
     }
