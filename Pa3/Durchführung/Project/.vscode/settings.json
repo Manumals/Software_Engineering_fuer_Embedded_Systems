@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "linesensor.h": "c"
+     "eventenum.h": "c"
+
     }
 }
