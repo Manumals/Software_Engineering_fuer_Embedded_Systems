@@ -44,7 +44,7 @@ void DisplayLapTime_DisplayLapTime(SoftTimer* lapTimer)
 {
     /* Shows the completed lap time on the OledDisplay */
     #define TIME_LEN_MAX (10)
-    UInt16 time = SoftTimer_get(lapTimer);
+    UInt16 time = lapTimer->threshHold - lapTimer->counter;
     Display_gotoxy(0, 2);
     char strTime[TIME_LEN_MAX] = {0};
     sprintf(strTime, "%.2u:%0.3u", time / 1000U, time % 1000U);
