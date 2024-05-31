@@ -17,7 +17,7 @@
 #include "State/CalibrateLineSensors.h"
 
 /* CONSTANTS **************************************************************************************/
-#define OPTIMAL_POS 2000
+#define OPTIMAL_POS (2000)
 #define SENSOR_WEIGHT_SCALE (1000u)
 
 /* MACROS *****************************************************************************************/
@@ -127,8 +127,8 @@ static void regulateSpeed(Int32 error, UInt16 * leftSpeed, UInt16 * rightSpeed)
     Int32 integral     = 0;  /* not needed */
     Int32 speedDifference = proportional + derivative + integral;
 
-    Int32 left = 0; //Todo: gParam->maxMotorSpeed + speedDifference;
-    Int32 right = 0; //Todo:gParam->maxMotorSpeed - speedDifference;
+    Int32 left = gParam.maxMotorSpeed + speedDifference;
+    Int32 right = gParam.maxMotorSpeed - speedDifference;
 
     if (left < 0)
     {

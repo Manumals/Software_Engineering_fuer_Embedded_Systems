@@ -19,9 +19,9 @@
 #include "os/SoftTimer.h"
 
 /* CONSTANTS **************************************************************************************/
-#define CALIB_SPEED 33u       /**< Motor speed while calibrating */
-#define CALIB_SPEED_SLOW 25u  /**< Motor speed while centering on line  */
-#define TIME_OUT_TIME 5000u    /**< Time out for the state */
+#define CALIB_SPEED (33u)       /**< Motor speed while calibrating */
+#define CALIB_SPEED_SLOW (25u)  /**< Motor speed while centering on line  */
+#define TIME_OUT_TIME (5000u)    /**< Time out for the state */
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
