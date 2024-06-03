@@ -13,12 +13,14 @@ end note
 
 'StateCalibrateLineSensors'
 StateCalibrateLineSensors --> StateReadyToDrive : Calibration done
+StateCalibrateLineSensors : do / Calibrate Line Sensors
+StateCalibrateLineSensors --> StateErrorHandler : Calibration failed
 
 'StateReadyToDrive'
-StateReadyToDrive --> StateSetParameters :ParamButton is released
-StateReadyToDrive --> StateDisplayCountdown : StartButton is released
-StateReadyToDrive --> StateCalibrateLineSensors : CalibrateButton is released
-StateReadyToDrive : entry / Display TeamName on the OledDisplay
+StateReadyToDrive --> StateSetParameters :ParamButton is pressed
+StateReadyToDrive --> StateDisplayCountdown : StartButton is pressed
+StateReadyToDrive --> StateCalibrateLineSensors : CalibrateButton is pressed
+StateReadyToDrive : do / Wait for button input
 note right of StateReadyToDrive
 The TeamName is permanently displayed in line 1
 end note
@@ -26,7 +28,7 @@ end note
 'StateDisplayCountdown'
 StateDisplayCountdown --> StateDriveToStart : CountDown is finished [DisplayCountdownTimer > 3s]
 StateDisplayCountdown: entry /  Start Timer DisplayCountdownTimer
-StateDisplayCountdown: entry / Starts the Countdown from 3 to 0 on the OledDisplay
+StateDisplayCountdown: do / Shows the Countdown from 3 to 0 on the OledDisplay
 StateDisplayCountdown: exit /  Stop Timer DisplayCountdownTimer
 note right of StateDisplayCountdown
 The countdown is displayed in line 2 
@@ -49,9 +51,8 @@ StateDriveToFinish : do / Follow the GuideLine
 'StateDriveOverGap'
 StateDriveOverGap --> StateErrorHandler : State DriveOverGap is active for more than 5s [DriveOverGapTimer > 5s]
 StateDriveOverGap  --> StateDriveToFinish : The GuideLine is recognized
-StateDriveOverGap: entry / Start Timer DriveOverGapTimer
+StateDriveOverGap: entry / Saves the time of the lapTimer
 StateDriveOverGap : do / The Robot searches for the GuideLine
-StateDriveOverGap: exit / End Timer DriveOverGapTimer
 
 'StateDisplayLapTime
 StateDisplayLapTime  --> StateReadyToDrive : Power to the DriveMotors is stopped
@@ -60,7 +61,7 @@ StateDisplayLapTime : entry / Stop the power to the DriveMotors
 StateDisplayLapTime : entry / The Buzzer emits the ShortBeep
 StateDisplayLapTime : exit / Shows the completed lap time on the OledDisplay
 note bottom of StateDisplayLapTime
-The current parameter set is displayed for 0.5 seconds on line 3  
+The current lap time is permanently displayed on line 3  
 end note
 
 'StateSetParameters
