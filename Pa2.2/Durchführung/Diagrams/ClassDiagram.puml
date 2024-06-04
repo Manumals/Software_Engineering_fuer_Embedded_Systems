@@ -120,6 +120,8 @@ package "HAL" #DDDDDD {
 package "Application"  {
 
     class "MainTask" {
+        -gMainTask: Task
+        -mainTaskWork (void * data): void
         + MainTask_init(void) : MainTask_Ret
     }
 
@@ -136,6 +138,8 @@ package "Application"  {
         PARAM_BUTTON_HAS_BEEN_RELEASED,
         START_FINISH_LINE_WAS_RECOGINZED,
         GUIDELINE_WAS_RECOGNIZED,
+        CALIBRATION_FAILED,
+        INIZALIZATION_FAILED,
         GUIDELINE_WAS_LOST,
         LAPTIME_IS_TOO_LONG,
         DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG,
@@ -143,14 +147,29 @@ package "Application"  {
     }
 
     class DriveHandler {
-        +DriveHandler_StopDriving(void): void
-        +DriveHandler_FindGuideLine(void):void
-        +DriveHandler_FollowGuideLine(UInt8): void
+        -calculatePosition(const LineSensorValues*): UInt32
+        -regulateSpeed(Int32, UInt16*, UInt16*):void
+        -gCurrentPos: UInt32
+        -gLastPosition: UInt32
+        -gLeftSpeed: UInt16
+        -gRightSpeed: UInt16
+        -gLastError: Int16
+        +DriveHandler_stopDriving(void): void
+        +DriveHandler_findGuideLine(void):void
+        +DriveHandler_followGuideLine(LineSensorValues*): void
     }
 
     class StateHandler {
         -gCurrentState: EventEnum
+        -gCurrentState:StateEnum
         -gLapTimer: SoftTimer*
+        -gEntryDone: Bool
+        -driveToStartEvent(EventEnum gCurrentEvent): void
+        -driveToFinishEvent(EventEnum gCurrentEvent): void
+        -driveOverGapEvent(EventEnum gCurrentEvent): void
+        -displayCountDownEvent(EventEnum gCurrentEvent): void 
+        -readyToDriveEvent(EventEnum gCurrentEvent): void
+        -calibrateLineSensorsEvent(EventEnum gCurrentEvent): void
         +StateHandler_process(void): void
     }
 
@@ -170,72 +189,76 @@ package "Application"  {
         StateHandler ..> SetParameters
 
         class InitializeMcu {
-            +InitializeMcu_InitializeAll(void): EventEnum 
-            +InitializeMcu_DisplayTeamName(void): void 
+            +InitializeMcu_initializeAll(void): EventEnum 
+            +InitializeMcu_displayTeamName(void): void 
         }
 
         class CalibrateLineSensors {
-            +CalibrateLineSensors_Initialize(void): EventEnum
-            +CalibrateLineSensors_CalibrateSensors(void): EventEnum
+            -gState: CalibrationState
+            -gResult: EventEnum
+            -gTimer: SoftTimer
+            +CalibrateLineSensors_initialize(void): void
+            +CalibrateLineSensors_calibrateSensors(void): EventEnum
         }
 
         class ReadyToDrive {
-            +ReadyToDrive_CheckStateOfButtons(void): EventEnum
+            -wasButtonPressed(ButtonID): Bool
+            -lastState: ButtonState
+            +ReadyToDrive_checkStateOfButtons(void): EventEnum
         }
 
         class DriveToStart {
-            -gMaxTimeTimer : SoftTimer*
-            +DriveToStart_StartMotorsAndTimer(void): void
-            +DriveToStart_FollowGuideLine(void): EventEnum
-            +DriveToStart_StopTimer(void): void
-            +DriveToStart_GoToDriveToFinish(void): SoftTimer*
+            -gMaxTimeTimer: SoftTimer
+            -gLapTimer: SoftTimer
+            -sensorValues: LineSensorValues
+            +DriveToStart_startMotorsAndTimer(void): void
+            +DriveToStart_followGuideLine(void): EventEnum
+            +DriveToStart_stopTimer(void): void
+            +DriveToStart_startTimerAndBeep(void): SoftTimer*
         }
         DriveToStart .[#Brown].> DriveHandler
         DriveToStart .[#Brown].> LineSensor
         DriveToStart .[#Brown].> SoftTimer
 
         class DriveToFinish {
-            +DriveToFinish_FollowGuideLine(SoftTimer*): EventEnum
+            +DriveToFinish_followGuideLine(SoftTimer*): EventEnum
         }
         DriveToFinish .[#Violet].> DriveHandler
         DriveToFinish .[#Violet].> LineSensor
 
         class DriveOverGap {
             -gEntryTime: UInt16
-            + DriveOverGap_SaveCurrentLapTime(SoftTimer*): void
-            + DriveOverGap_DriveOverGap(SoftTimer*): EventEnum
+            + DriveOverGap_saveCurrentLapTime(SoftTimer*): void
+            + DriveOverGap_driveOverGap(SoftTimer*): EventEnum
         }
         DriveOverGap .[#gold].> DriveHandler
         DriveOverGap .[#gold].> LineSensor
 
         class DisplayCountdown {
-            -gCountdownTimer: SoftTimer*
-            +DisplayCountdown_StartCountdown(void): void
-            +DisplayCountdown_DisplayCountdown(void): EventEnum
-            +DisplayCountdown_StopCountdown(void): void
+            -gCountdownTimer: SoftTimer
+            -gLastTime: UInt8
+            +DisplayCountdown_startCountdown(void): void
+            +DisplayCountdown_displayCountdown(void): EventEnum
+            +DisplayCountdown_stopCountdown(void): void
         }
 
         class DisplayLapTime {
-            +DisplayLapTime_StopAfterLap(SoftTimer*): EventEnum
-            +DisplayLapTime_DisplayLapTime(void): void
+            +DisplayLapTime_stopAfterLap(SoftTimer*): EventEnum
+            +DisplayLapTime_displayLapTime(SoftTimer*): void
         }
 
         class SetParameters {
             -gParamSetIdx: UInt8
             -gParamSetArray[]: ParamSet
-            -gDisplayTimer: SoftTimer*
-            -nextParamSet(void): void
-            -displayParamSetIdx(void): void
-            +SetParameters_SetNextParamSet(void): void
-            +SetParameters_DisplayParamSet(void): EventEnum
+            +SetParameters_setNextParamSet(void): void
+            +SetParameters_displayParamSet(void): void
             +SetParameters_getCurrentParamSet(void): ParamSet
         }
 
         DriveHandler ..> SetParameters
 
         class ErrorHandlerState{
-            +ErrorHandlerState_CallErrorHandler(EventEnum): void
-            +ErrorHandlerState_WaitForReset(void): void
+            +ErrorHandlerState_callErrorHandler(EventEnum): void
         }
         note bottom of ErrorHandlerState
         The ErrorHandler does not require a return value, 
