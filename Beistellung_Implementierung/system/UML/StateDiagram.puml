@@ -1,0 +1,83 @@
+@startuml
+
+'StateInitializeMcu'
+[*] --> StateInitializeMcu : MCU was switched on or reset
+StateInitializeMcu --> StateCalibrateLineSensors : Initialization done
+StateInitializeMcu : entry / Starting the initialization
+StateInitializeMcu : exit / DisplayTeamName on the OledDisplay
+note left of StateInitializeMcu
+    The team name will be shown on the display in line 1 all the time. 
+    Thus, the team name will be displayed more than 2 seconds 
+    before the start (count down of at least 3 seconds).
+end note
+
+'StateCalibrateLineSensors'
+StateCalibrateLineSensors --> StateReadyToDrive : Calibration done
+StateCalibrateLineSensors : entry / Initializes all variables that are needed for the calibration
+StateCalibrateLineSensors : do / Calibrate Line Sensors
+StateCalibrateLineSensors --> StateErrorHandler : Calibration failed
+
+'StateReadyToDrive'
+StateReadyToDrive --> StateSetParameters :ParamButton is released
+StateReadyToDrive --> StateDisplayCountdown : StartButton is released
+StateReadyToDrive --> StateCalibrateLineSensors : CalibrateButton is released
+StateReadyToDrive : do / Wait for button input
+
+'StateDisplayCountdown'
+StateDisplayCountdown --> StateDriveToStart : CountDown is finished [DisplayCountdownTimer == 0s]
+StateDisplayCountdown: entry /  Start Timer DisplayCountdownTimer
+StateDisplayCountdown: do / Shows the Countdown from 3 to 0 on the OledDisplay
+StateDisplayCountdown: exit /  Stop Timer DisplayCountdownTimer
+note right of StateDisplayCountdown
+The countdown is displayed in line 2 
+end note
+
+'StateDriveToStart'
+StateDriveToStart --> StateDriveToFinish : StartFinishLine is recognized / The Buzzer emits the ShortBeep, Start the LapTimer 
+StateDriveToStart --> StateErrorHandler : DriveToStart is active for more than 10s
+StateDriveToStart: entry / The DriveMotors are supplied with power 
+StateDriveToStart: entry / Start Timer DriveToStartTimer
+StateDriveToStart: do / Follow the GuideLine 
+StateDriveToStart: exit / Stop Timer DriveToStartTimer
+
+'StateDriveToFinish'
+StateDriveToFinish --> StateErrorHandler : LapTimer is active for more than 20 seconds
+StateDriveToFinish --> StateDriveOverGap : The GuideLine was lost
+StateDriveToFinish --> StateDisplayLapTime : StartFinishLine is recognized
+StateDriveToFinish : do / Follow the GuideLine 
+
+'StateDriveOverGap'
+StateDriveOverGap --> StateErrorHandler : State DriveOverGap is active for more than 5s [DriveOverGapTimer > 5s]
+StateDriveOverGap  --> StateDriveToFinish : The GuideLine is recognized
+StateDriveOverGap: entry / Saves the time of the lapTimer
+StateDriveOverGap : do / The Robot searches for the GuideLine
+
+'StateDisplayLapTime
+StateDisplayLapTime  --> StateReadyToDrive : Power to the DriveMotors is stopped
+StateDisplayLapTime : entry / Stop the LapTimer
+StateDisplayLapTime : entry / Stop the power to the DriveMotors
+StateDisplayLapTime : entry / The Buzzer emits the ShortBeep
+StateDisplayLapTime : exit / Shows the completed lap time on the OledDisplay
+note bottom of StateDisplayLapTime
+The current lap time is permanently displayed on line 3  
+end note
+
+'StateSetParameters
+StateSetParameters --> StateReadyToDrive : Next ParamSet is selected
+StateSetParameters: entry / Cycle to the next parameter set
+StateSetParameters: exit / Display parameter set number
+note bottom of StateSetParameters
+The parameter set number is permanently displayed in line 4
+end note
+
+'StateErrorHandler
+StateErrorHandler: entry / Stop the power to the DriveMotors
+StateErrorHandler: entry / Play the AlarmSignal on the Buzzer
+StateErrorHandler: entry / Display error message on the OledDisplay
+StateErrorHandler: entry / Stop the processor
+
+note bottom of StateSetParameters
+Processor is stopped after displaying the team name
+end note
+
+@enduml
