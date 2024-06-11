@@ -55,7 +55,6 @@ extern MainTask_Ret MainTask_init(void)
         if ( SCHEDULER_RET_SUCCESS == Scheduler_addTask(&gMainTask))
         {
             /* TODO: Add your application here. */
-            
         }
         else
         {
