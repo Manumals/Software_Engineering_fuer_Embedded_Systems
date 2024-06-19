@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH 2019   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/trunk/system/50_Implementierung/Projekte/Linienfolger/20_Beistellung/Delivery/Beistellung_r300/Coding/lib/hal_target/hal/TickTimer.h $
+
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Hal
@@ -23,9 +25,7 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include <util/delay.h>
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
@@ -35,12 +35,10 @@ extern "C"
 #define TICKTIMER_DELAY_MS(ms)  _delay_ms((ms))
 
 /* TYPES ******************************************************************************************/
-
 /** Callback function type for installing a timer interrupt callback function. */
 typedef void (*TimerTickCallback)(void);
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initialize the tick-timer.
  * Timer interrupt shall increment the tick counter ever millisecond.
  */
@@ -54,9 +52,16 @@ extern void TickTimer_init (void);
 extern void TickTimer_setCallback (TimerTickCallback callback);
 
 /** Get the current value of the tick Counter in micro seconds since timer started.
+ * Function call needs ~26us
  * @return tick counter value in microseconds.
  */
 extern UInt64 TickTimer_get (void);
+
+/** Get the current value of the tick Counter since timer started. Overflows every 1.3s!
+ * Function call needs ~3.3us
+ * @return tick counter value in ticks.
+ */
+extern UInt16 TickTimer_getTicks(void);
 
 /** Delay for the given time in seconds.
  * @param[in] seconds the time to delay in seconds.

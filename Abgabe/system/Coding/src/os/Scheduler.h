@@ -26,19 +26,16 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 #include "Task.h"
 
 /* CONSTANTS **************************************************************************************/
-
 /** Maximum number of tasks that can be handled by the scheduler. */
-#define SCHEDULER_MAX_TASKS (10)
+#define SCHEDULER_MAX_TASKS (5)
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
 /** Statuses of the scheduler */
 typedef enum
 {
@@ -50,7 +47,6 @@ typedef enum
 } Scheduler_Ret;
 
 /* PROTOTYPES *************************************************************************************/
-
 /**  Initialize the scheduler module.
   *
   */

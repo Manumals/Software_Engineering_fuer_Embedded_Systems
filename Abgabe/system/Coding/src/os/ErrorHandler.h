@@ -23,17 +23,13 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
 
-
 /* MACROS *****************************************************************************************/
 
-
 /* TYPES ******************************************************************************************/
-
 /** All error codes. */
 typedef enum tag_ErrorCode
 {
@@ -55,7 +51,7 @@ typedef enum tag_ErrorCode
     ERRORHANDLER_DRIVING_TIMER_START_FAIL      = 302,   /**< Timer start failed in state DRIVING.                   */
     ERRORHANDLER_DRIVING_TIMEOUT               = 303,   /**< Timeout in state DRIVING.                              */
     ERRORHANDLER_LINELOST_TIMEOUT              = 304,   /**< Timeout in state LINE LOST.                            */
-//    ERRORHANDLER_FINISH_TIMER_INIT_FAIL        = 400,   /**< Finish state timer register error                      */
+    ERRORHANDLER_FINISH_TIMER_INIT_FAIL        = 400,   /**< Finish state timer register error                      */
 //    ERRORHANDLER_FINISH_TIMER_UNINIT_FAIL      = 401,   /**< Finish state timer un-register error                   */
     ERRORHANDLER_UNKNOWN_ERROR                 = 500,   /**< Unknown error                                          */
 } ErrorHandlerErrorCode;
@@ -70,7 +66,6 @@ typedef void (*PrintCallback)(const char * line1, const char * line2);
 typedef void (*ErrorCallback)(ErrorHandlerErrorCode errorcode);
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Show error code and halt system.
  *
  * @param[in] errorCode Numeric error code to display.

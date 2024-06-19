@@ -23,14 +23,11 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
 
-
 /* MACROS *****************************************************************************************/
-
 /** Get state of  a given task.
  *
  * @param[in] task Pointer to task structure.
@@ -50,7 +47,6 @@ extern "C"
 #define TASK_EXECUTE(task)              (task)->workCallback((task->instanceData))
 
 /* TYPES ******************************************************************************************/
-
 /** Statuses of the task. */
 typedef enum
 {
@@ -81,7 +77,6 @@ typedef struct tag_Task
 } Task;
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initialize a task structure.
  *
  * @param[in] task The task structure to initialize.

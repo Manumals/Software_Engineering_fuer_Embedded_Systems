@@ -14,31 +14,26 @@ Main function for pololu Line follower.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
-#include "os/Os.h"
-#include "hal/Hal.h"
-#include "Service/Service.h"
-#include "os/Scheduler.h"
-#include "os/ErrorHandler.h"
 #include "app/MainTask.h"
+#include "Common/Debug.h"
+#include "hal/Hal.h"
+#include "os/ErrorHandler.h"
+#include "os/Scheduler.h"
+#include "os/Os.h"
+#include "Service/Service.h"
 
 int main(void)
 {
     /* Init everything. */
     Hal_init();
     OS_init();
-
-    /* Service_init must be called after OS_init()! */
-    Service_init();
-
+    Service_init(); /* Service_init must be called after OS_init()! */
     MainTask_init();
 
     /* Run Scheduler. */
     Scheduler_execute();
 
     /* Should not be reachable. */
+    Debug_showMsg("ERR:SchedEnd");
     ErrorHandler_halt(ERRORHANDLER_MAIN_SCHEDULER_EXIT);
 }
-
-
-

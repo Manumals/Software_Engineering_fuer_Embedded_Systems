@@ -16,7 +16,6 @@ For a detailed description see the detailed description in @ref Button.h
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Service.h"
 
 #include "Button.h"
@@ -37,12 +36,11 @@ For a detailed description see the detailed description in @ref Button.h
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void Service_init(void)
 {
     Button_init();
-    Buzzer_init();
     Display_init();
+    Buzzer_init();
     DriveControl_init();
     Led_init();
     LineSensor_init();

@@ -33,26 +33,28 @@ simply XORing them again.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
+#include "DriveControl.h"
 
 #include <util/atomic.h>
-
-#include "DriveControl.h"
+#include "Common/Debug.h"
 #include "hal/Gpio.h"
 #include "hal/Irq.h"
 #include "hal/Pwm.h"
 
 /* CONSTANTS **************************************************************************************/
-
 /** Aproximation of wheel cirumference based on diameter  (d * pi). */
 #define WHEEL_CIRCUMFERENCE_MM ((DRIVE_CONTROL_WHEEL_DIAMETER_MM * 3141l) / 1000l)
 
 /** How many encoder steps is one wheel revolution. */
 #define WHEEL_REVOLUTION_STEPS (DRIVE_CONTROL_ENCODER_STEPS_PER_REVOLUTION * DRIVE_CONTROL_GEAR_RATIO)
 
+#ifdef MIN_SPEED
+    #define SPEED_MIN (10U)
+#endif
+
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
 /** Encoder State. */
 typedef struct tag_MotorEncoder
 {
@@ -63,7 +65,6 @@ typedef struct tag_MotorEncoder
 } MotorEncoder;
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Interrupt handler for left encoder pulses. */
 static void onLeftEncoderInterrupt (void);
 
@@ -106,12 +107,10 @@ static void MotorEncoder_reset (MotorEncoder * encoder);
 static MotorEncoderCounter MotorEncoder_get (MotorEncoder * encoder);
 
 /* VARIABLES **************************************************************************************/
-
 /** Encoder states. */
 static MotorEncoder gEncoder[DRIVE_CONTROL_MOTOR_MAX];
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 extern void DriveControl_init(void)
 {
     Irq_setCallback(IRQ_ENCODER_LEFT, onLeftEncoderInterrupt);
@@ -130,6 +129,12 @@ extern void DriveControl_init(void)
 extern void DriveControl_drive(DriveControlMotorID motorID, UInt8 speed, DriveControl_Direction direction)
 {
     Gpio_State gpioDirValue = direction ? GPIO_STATE_ON : GPIO_STATE_OFF;
+    #ifdef MIN_SPEED
+        if ((speed > 0U) && (speed < SPEED_MIN))
+        {
+            speed = SPEED_MIN;
+        }
+    #endif
 
     switch (motorID)
     {
@@ -173,7 +178,6 @@ extern void DriveControl_resetMileage(void)
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
-
 static void MotorEncoder_init(MotorEncoder * encoder, DriveControlMotorID id)
 {
     encoder->id = id;

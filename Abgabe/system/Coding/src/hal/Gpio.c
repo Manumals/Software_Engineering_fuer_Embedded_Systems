@@ -16,25 +16,21 @@ This module abstracts the GPIOs of the hardware.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
 #include "hal/Gpio.h"
 
 /* CONSTANTS **************************************************************************************/
+#define OPT_INPUT           (0x00U)   /**< Pin direction input is bit 0 == 0.  */
+#define OPT_OUTPUT          (0x01U)   /**< Pin direction output is bit 0 == 1. */
 
-#define OPT_INPUT           (0x00u)   /**< Pin direction input is bit 0 == 0.  */
-#define OPT_OUTPUT          (0x01u)   /**< Pin direction output is bit 0 == 1. */
+#define OPT_TRISTATE        (0x00U)   /**< Input pullup disable is bit 1 == 0. */
+#define OPT_PULLUP          (0x02U)   /**< Input pullup enable is bit 1 == 1.  */
 
-#define OPT_TRISTATE        (0x00u)   /**< Input pullup disable is bit 1 == 0. */
-#define OPT_PULLUP          (0x02u)   /**< Input pullup enable is bit 1 == 1.  */
-
-#define OPT_LOW             (0x00u)   /**< Output low  is bit 2 == 1.          */
-#define OPT_HIGH            (0x04u)   /**< Output high is  bit 2 == 0.         */
-#define OPT_INIT            (0x08u)   /**< Use config for HAL gpio init        */
-
-
+#define OPT_LOW             (0x00U)   /**< Output low  is bit 2 == 1.          */
+#define OPT_HIGH            (0x04U)   /**< Output high is  bit 2 == 0.         */
+#define OPT_INIT            (0x08U)   /**< Use config for HAL gpio init        */
 
 /* MACROS *****************************************************************************************/
 #define IS_OUTPUT(options)  (((options) & OPT_OUTPUT) == OPT_OUTPUT)
@@ -43,7 +39,6 @@ This module abstracts the GPIOs of the hardware.
 #define IS_INIT(options)     (((options) & OPT_INIT) == OPT_INIT)
 
 /* TYPES ******************************************************************************************/
-
 /** GPIO ports */
 typedef enum tag_Port
 {
@@ -66,7 +61,6 @@ typedef struct tag_GPIO_PortConfig
 } GPIO_PortConfig;
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Configure pin.
  * @param[in] id Gpio ID.
  * @param[in] options options bits.
@@ -74,7 +68,6 @@ typedef struct tag_GPIO_PortConfig
 static void setConfig(Gpio_ID id, UInt8 options);
 
 /* VARIABLES **************************************************************************************/
-
 /** Pololu Zumo U324 pin assignment. */
 static const GPIO_PortConfig portConfig[] PROGMEM =
 {
@@ -118,7 +111,6 @@ static const GPIO_PortConfig portConfig[] PROGMEM =
 };
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 Gpio_Ret Gpio_init(void)
 {
     /* Initialize all defined pins. */
@@ -299,8 +291,8 @@ Gpio_Ret Gpio_alloc(Gpio_ID id, UInt8 * config)
 {
     const GPIO_PortConfig * cfg = &portConfig[id];
 
-    UInt8 ddrx = 0u;
-    UInt8 portx = 0u;
+    UInt8 ddrx = 0U;
+    UInt8 portx = 0U;
 
     UInt8 pin = pgm_read_byte(&cfg->pin);
     UInt8 dd  = pgm_read_byte(&cfg->dd);
@@ -347,7 +339,7 @@ Gpio_Ret Gpio_alloc(Gpio_ID id, UInt8 * config)
             break;
     }
 
-    *config  = 0u;
+    *config  = 0U;
 
     if (ddrx & dd)
     {
@@ -379,7 +371,6 @@ Gpio_Ret Gpio_free(Gpio_ID id, UInt8 config)
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
-
 static void setConfig(Gpio_ID id, UInt8 options)
 {
     const GPIO_PortConfig * cfg = &portConfig[id];

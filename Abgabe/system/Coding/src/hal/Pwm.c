@@ -14,28 +14,25 @@ This module provides PWM output support.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
+#include "Pwm.h"
 
 #include  <avr/io.h>
 
-#include "Pwm.h"
-
 /* CONSTANTS **************************************************************************************/
-
 /** Frequency of alarm tone. */
-#define PWM_BUZZER_ALARM_FREQ       (500u)
+#define PWM_BUZZER_ALARM_FREQ       (500U)
 
 /** Frequency of notify tone. */
-#define PWM_BUZZER_NOTIFY_FREQ      (1000u)
+#define PWM_BUZZER_NOTIFY_FREQ      (1000U)
 
 /** Percentage maximum value. */
-#define PERCENTAGE_MAXIMUM          (100u)
+#define PERCENTAGE_MAXIMUM          (100U)
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
-
 /**
  * Initialize the motor PWM.
  */
@@ -54,7 +51,6 @@ static void setBuzzerFrequency (UInt16 freq, UInt16 volume);
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void Pwm_init(void)
 {
     initMotorPwm();
@@ -92,7 +88,6 @@ void Pwm_setDutyCycle(PwmID id, UInt8 percent)
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
-
 static void initMotorPwm(void)
 {
     /* Timer 1
@@ -103,9 +98,9 @@ static void initMotorPwm(void)
     TCCR1A = (1<<COM1A1)|(1<<COM1B1); /* Clear OC1A/OC1B on match, set at TOP. */
     TCCR1B = (1<<WGM13)|(1<<CS10);  /* PWM, Phase and Frequency Correct, no prescaling. */
 
-    ICR1 = 400u;
-    OCR1A = 0u;      /* DutyCycle 0%. */
-    OCR1B = 0u;      /* DutyCycle 0%. */
+    ICR1 = 400U;
+    OCR1A = 0U;      /* DutyCycle 0%. */
+    OCR1B = 0U;      /* DutyCycle 0%. */
 }
 
 static void initBuzzerPwm(void)

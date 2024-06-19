@@ -16,10 +16,9 @@ For a detailed description see the detailed description in @ref Scheduler.h.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
+#include "os/Task.h"
 
 #include <string.h>
-
-#include "os/Task.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -32,7 +31,6 @@ For a detailed description see the detailed description in @ref Scheduler.h.
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 Task_Ret Task_init(Task * pTask, TaskWorkCallback callback, TaskState state, void * data)
 {
     pTask->state = state;

@@ -14,9 +14,9 @@ ErrorHandler for all error processing.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
 #include "os/ErrorHandler.h"
 
+#include "Common/Debug.h"
 #include "hal/Hal.h"
 
 /* CONSTANTS **************************************************************************************/
@@ -26,7 +26,6 @@ ErrorHandler for all error processing.
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Error Handler
  * @param[in] errorCode The error code.
  * @param[in] halt Flag indicating if we should switch to a safe state.
@@ -34,7 +33,6 @@ ErrorHandler for all error processing.
 static void handleError (ErrorHandlerErrorCode errorCode, bool halt);
 
 /* VARIABLES **************************************************************************************/
-
 /** Print callback for showing 2 line error messages. */
 static PrintCallback gPrintCallback = NULL;
 
@@ -42,7 +40,6 @@ static PrintCallback gPrintCallback = NULL;
 static ErrorCallback gErrorCallback = NULL;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void ErrorHandler_setPrintCallback(PrintCallback callback)
 {
     gPrintCallback = callback;
@@ -55,16 +52,15 @@ void ErrorHandler_setErrorCallback(ErrorCallback callback)
 
 void ErrorHandler_show(ErrorHandlerErrorCode errorCode)
 {
-    handleError(errorCode, false);
+    handleError(errorCode, FALSE);
 }
 
 void ErrorHandler_halt(ErrorHandlerErrorCode errorCode)
 {
-    handleError(errorCode, true);
+    handleError(errorCode, TRUE);
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
-
 static void handleError(ErrorHandlerErrorCode errorCode, bool halt)
 {
     if (NULL != gPrintCallback)

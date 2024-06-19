@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH System-Entwicklung und Beratung 2015   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/trunk/system/50_Implementierung/Projekte/Linienfolger/20_Beistellung/Delivery/Beistellung_r300/Coding/lib/service_target/service/LineSensor.h $
+
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Service
@@ -22,72 +24,103 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
 
 /** Maximum sensor read delay. */
-#define LINESENSOR_READ_TIMEOUT_US    (2000u)
+#define LINESENSOR_READ_TIMEOUT_US    (2000U)
 
 /** Number of sensors. */
-#define LINESENSOR_COUNT            (5u)
+#define LINESENSOR_COUNT            (5U)
 
-#define LINESENSOR_LEFT             (0u)   /**< leftmost sensor */
-#define LINESENSOR_MIDDLE_LEFT      (1u)   /**< middle left sensor */
-#define LINESENSOR_MIDDLE           (2u)   /**< middle sensor */
-#define LINESENSOR_MIDDLE_RIGHT     (3u)   /**< middle right sensor */
-#define LINESENSOR_RIGHT            (4u)   /**< rightmost sensor */
+#define LINESENSOR_LEFT             (0U)   /**< leftmost sensor */
+#define LINESENSOR_MIDDLE_LEFT      (1U)   /**< middle left sensor */
+#define LINESENSOR_MIDDLE           (2U)   /**< middle sensor */
+#define LINESENSOR_MIDDLE_RIGHT     (3U)   /**< middle right sensor */
+#define LINESENSOR_RIGHT            (4U)   /**< rightmost sensor */
 
 /** Normalized value range. */
-#define LINESENSOR_NORMALIZED_RANGE   (1000u)
+#define LINESENSOR_NORMALIZED_RANGE   (255U)
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
+/** Calibration data for a line sensor. */
+typedef struct tag_LineSensorCalibrationData
+{
+    UInt8 minVal; /**< Minimum values obtained during calibration.     */
+    UInt8 maxVal; /**< Maximum values obtained during calibration.     */
+    UInt8 range; /**< Calibration range.                               */
+} LineSensorCalibrationData;
+
 /**
  * Type holding line sensor values.
  */
 typedef struct tag_LineSensorValues
 {
-    UInt16 value[LINESENSOR_COUNT];      /*< Line detect confidence in percent.   */
-    bool   calibrated[LINESENSOR_COUNT]; /*< indicate if result is calibrated.    */
+    UInt8 value[LINESENSOR_COUNT];      /*< Line detect confidence in percent.   */
 } LineSensorValues;
 
-/* PROTOTYPES *************************************************************************************/
+/**
+ * Type holding line sensor calibration values.
+ */
+typedef struct tag_LineSensorCalibration
+{
+    bool   calibrated[LINESENSOR_COUNT]; /*< indicate if line sensor is calibrated.    */
+} LineSensorCalibration;
 
+/* PROTOTYPES *************************************************************************************/
 /**
  * Initialize module.
  */
-extern void LineSensor_init (void);
+extern void LineSensor_init(void);
+
+/**
+ * Deinitialize module.
+ */
+extern void LineSensor_deinit(void);
 
 /** Start calibrating the LineSensors.
 */
-extern void LineSensor_startCalibration (void);
+extern void LineSensor_startCalibration(void);
 
 /** Stop calibrating the LineSensors.
 */
-extern void LineSensor_stopCalibration (void);
+extern void LineSensor_stopCalibration(void);
 
-/* Get status of calibrations.
+/** Get status of calibrations.
  * @return  bool status.
  * @retval  true
  *              All sensors calibrated succesfully.
  * @retval  false
  *              Not all sensors calibrated yet.
  */
-extern bool LineSensor_getCalibrationState (void);
+extern bool LineSensor_getCalibrationState(void);
+
+/** Get calibration data
+ * @param[out] sensorNo The sensor no for which the calibration data should be returned
+ * @return calibration data of the given sensor
+ */
+extern LineSensorCalibrationData LineSensor_getCalibrationData(UInt8 sensorNo);
 
 /** Read the LineSensors.
 *
 * @param[out] sensorValues The sensor values from the LineSensor.
 */
-extern void LineSensor_read (LineSensorValues * sensorValues);
+extern void LineSensor_read(LineSensorValues * sensorValues, LineSensorCalibration *calib);
+
+/** Read raw (uncalibrated) sensor values.
+ *  Reading is done by charging the sensors for ~10Us, then measure the time until the drop
+ *  to low level again. A darker ground means a slower voltage drop.
+ * @param[out] data sensor data value container.
+ */
+extern void LineSensor_readRaw(LineSensorValues * data);
 
 /** Turn Emitters on. */
-extern void LineSensor_enableEmitter (void);
+extern void LineSensor_enableEmitter(void);
 
 /** Turn Emitters off */
-extern void LineSensor_disableEmitter (void);
+extern void LineSensor_disableEmitter(void);
 
 #endif  /* LINESENSOR_H */

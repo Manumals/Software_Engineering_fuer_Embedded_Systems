@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH System-Entwicklung und Beratung 2015   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/trunk/system/50_Implementierung/Projekte/Linienfolger/20_Beistellung/Delivery/Beistellung_r300/Coding/lib/service_target/service/Buzzer.h $
+
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Service
@@ -22,7 +24,6 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
@@ -30,7 +31,6 @@ extern "C"
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
 /** List of available buzzer sounds. */
 typedef enum tag_BuzzerID
 {
@@ -39,9 +39,11 @@ typedef enum tag_BuzzerID
 } BuzzerID;
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initializes the buzzer module. */
 extern void Buzzer_init (void);
+
+/** Deinitializes the buzzer module. */
+extern void Buzzer_deinit(void);
 
 /** Play a buzzer sound.
 *

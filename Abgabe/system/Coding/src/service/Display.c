@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH 2019   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/branches/%23OLED/system/Coding/src/service/Display.c $
+
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Service
@@ -16,36 +18,32 @@ For a detailed description see the detailed description in @ref display.h.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
-#include <avr/pgmspace.h>
 #include "service/Display.h"
+
+#include <string.h>
+#include <avr/pgmspace.h>
 #include "hal/Gpio.h"
 #include "hal/TickTimer.h"
 #include "os/ErrorHandler.h"
 #include "Common/font.h"
 
 /* CONSTANTS **************************************************************************************/
+#define DISPLAY_HOME_POSITION (2U)
 
-#define DISPLAY_HOME_POSITION (2u)
+#define TIMEOUT_RESET (10U)
 
-#define TIMEOUT_RESET (10u)
+#define LOWEST_SUPPORTED_ASCII (0x20U)  /**< Space */
+#define HIGHEST_SUPPORTED_ASCII (0x7FU) /**< DEL */
 
-#define LOWEST_SUPPORTED_ASCII (0x20u)  /**< Space */
-#define HIGHEST_SUPPORTED_ASCII (0x7Fu) /**< DEL */
+#define COLUMNS_PER_CHARACTER (5U)
 
-#define COLUMNS_PER_CHARACTER (5u)
-
-#define DISPLAY_MAX_COLUMNS (132u)
+#define DISPLAY_MAX_COLUMNS (132U)
  
-#define DISPLAY_MAX_LENGTH (21u) /**< 0..20 (DISPLAY_MAX_COLUMNS / DISPLAY_CHARACTER_WITDH) */
-
-#define DISPLAY_MAX_LINES (8u) /**< 0..7 */
-#define DISPLAY_CHARACTER_WITDH (6u) /**< Sum of COLUMS_PER_CHARACTER + 1 space between characters. */
+#define DISPLAY_CHARACTER_WITDH (COLUMNS_PER_CHARACTER + 1U) /**< Sum of COLUMS_PER_CHARACTER + 1 space between characters. */
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
 /** LCD display controller command masks. */
 enum tag_Cmds
 {
@@ -59,7 +57,6 @@ enum tag_Cmds
 };
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Save multiplexed pins tates and reprogram to display usage. */
 static void switchPins (void);
 
@@ -102,7 +99,6 @@ static void writeError (const char * line);
 static void drawBar (void);
 
 /* VARIABLES **************************************************************************************/
-
 /** Storage for saving multiplexed pin states. */
 static UInt8 savedPins[2];
 
@@ -113,7 +109,6 @@ static bool isInitialized = false;
 static UInt8 xPosition = 0;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void Display_init(void)
 {
     switchPins();
@@ -155,7 +150,7 @@ void Display_clear(void)
         /* Enter command mode. */
         Gpio_write(GPIO_OLED_DC, GPIO_STATE_OFF);
 
-        writeByte(CMD_SET_COLUMN_ADDR_LOW | (DISPLAY_HOME_POSITION & 0x0Fu));
+        writeByte(CMD_SET_COLUMN_ADDR_LOW | (DISPLAY_HOME_POSITION & 0x0FU));
 
         for (UInt8 page = 0; page < DISPLAY_MAX_LINES; page++)
         {
@@ -163,7 +158,7 @@ void Display_clear(void)
             Gpio_write(GPIO_OLED_DC, GPIO_STATE_OFF);
 
             writeByte(CMD_SET_PAGE_ADDR | page);
-            writeByte(CMD_SET_COLUMN_ADDR_HIGH | (DISPLAY_HOME_POSITION >> 4u));
+            writeByte(CMD_SET_COLUMN_ADDR_HIGH | (DISPLAY_HOME_POSITION >> 4U));
 
             Display_clearLine();
         }
@@ -194,8 +189,8 @@ void Display_home(void)
         Gpio_write(GPIO_OLED_DC, GPIO_STATE_OFF);
 
         writeByte(CMD_SET_PAGE_ADDR | 0);
-        writeByte(CMD_SET_COLUMN_ADDR_HIGH | (DISPLAY_HOME_POSITION >> 4u));
-        writeByte(CMD_SET_COLUMN_ADDR_LOW | (DISPLAY_HOME_POSITION & 0x0Fu));
+        writeByte(CMD_SET_COLUMN_ADDR_HIGH | (DISPLAY_HOME_POSITION >> 4U));
+        writeByte(CMD_SET_COLUMN_ADDR_LOW | (DISPLAY_HOME_POSITION & 0x0FU));
 
         restorePins();
     }
@@ -215,14 +210,20 @@ void Display_gotoxy(UInt8 x, UInt8 y)
 
         writeByte(CMD_SET_PAGE_ADDR | y);
 
-        writeByte(CMD_SET_COLUMN_ADDR_HIGH | (displayXPosition >> 4u));
-        writeByte(CMD_SET_COLUMN_ADDR_LOW | (displayXPosition & 0xFu));
+        writeByte(CMD_SET_COLUMN_ADDR_HIGH | (displayXPosition >> 4U));
+        writeByte(CMD_SET_COLUMN_ADDR_LOW | (displayXPosition & 0xFU));
 
         restorePins();
     }
 }
 
-void Display_write(const char * line, UInt8 length)
+void Display_write(const char * line)
+{
+    UInt8 length = strlen(line);
+    Display_writeWithLength(line, length);
+}
+
+void Display_writeWithLength(const char * line, UInt8 length)
 {
     if (!isInitialized)
     {
@@ -249,7 +250,38 @@ void Display_write(const char * line, UInt8 length)
     restorePins();
 }
 
-void Display_writeBar(UInt8 height)
+void Display_writeData(const UInt8 * cols, UInt8 length)
+{
+    if (!isInitialized)
+    {
+        return;
+    }
+
+    UInt8 maxLength = DISPLAY_MAX_COLUMNS - xPosition;
+
+    if (length > maxLength)
+    {
+        length = maxLength;
+    }
+
+    switchPins();
+
+    /* Enter data mode. */
+    Gpio_write(GPIO_OLED_DC, GPIO_STATE_ON);
+
+    for (UInt8 colIndex = 0; colIndex < length; colIndex++)
+    {
+        UInt8 column = pgm_read_byte(&cols[colIndex]);
+        writeByte(column);
+
+    }
+
+    xPosition += (length + COLUMNS_PER_CHARACTER) / (COLUMNS_PER_CHARACTER + 1U);
+    
+    restorePins();
+}
+
+void Display_writeCharBar(UInt8 height)
 {
     UInt8 maxLength = DISPLAY_MAX_LENGTH - xPosition;
 
@@ -263,6 +295,63 @@ void Display_writeBar(UInt8 height)
         drawBar();
     }
 }
+
+#ifdef DEBUG_H
+    void Display_writeBar(UInt32 width)
+    {
+        UInt8 maxX = width * 128UL / ((LINESENSOR_COUNT-1)*(LINESENSOR_NORMALIZED_RANGE+1U));
+        if (DISPLAY_MAX_COLUMNS-1 < maxX)
+        {
+            maxX = DISPLAY_MAX_COLUMNS-1;
+        }
+        for (UInt8 pixelX = 0U; pixelX < DISPLAY_MAX_COLUMNS; pixelX++)
+        {
+            UInt8 byte = (pixelX < maxX)*0x7F;
+            if (0U == pixelX % 32U)
+            {
+                byte &= 0x55;
+            }
+            writeByte(byte);
+        }
+        for (UInt8 pixelX = maxX+1; pixelX < DISPLAY_MAX_LENGTH; pixelX++)
+        {
+            writeByte(0x00);
+        }
+    }
+
+    void Display_write5Bars(LineSensorValues * sensorValues, UInt8 line)
+    {
+        for (UInt8 idxSens = 1U; idxSens <= LINESENSOR_COUNT; idxSens +=2)
+        {
+            Display_gotoxy(0, line++);
+
+            UInt8 maxX1 = sensorValues->value[idxSens-1] * 128UL / LINESENSOR_NORMALIZED_RANGE;
+            UInt8 maxX2 = 0U;
+            if (LINESENSOR_COUNT > idxSens)
+            {
+                maxX2 = sensorValues->value[idxSens-0] * 128UL / LINESENSOR_NORMALIZED_RANGE;
+            }
+            if (DISPLAY_MAX_COLUMNS-1 < maxX1)
+            {
+                maxX1 = DISPLAY_MAX_COLUMNS-1;
+            }
+            if (DISPLAY_MAX_COLUMNS-1 < maxX2)
+            {
+                maxX2 = DISPLAY_MAX_COLUMNS-1;
+            }
+
+            for (UInt8 pixelX = 0U; pixelX < DISPLAY_MAX_COLUMNS; pixelX++)
+            {
+                UInt8 byte = (pixelX < maxX1)*0x07 + (pixelX < maxX2)*0x70;
+                if (0U == pixelX % 32U)
+                {
+                    byte &= 0x55;
+                }
+                writeByte(byte);
+            }
+        }
+    }
+#endif
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
 static void drawBar (void)
@@ -308,16 +397,7 @@ static void displayError(const char * line1, const char * line2)
 
 static void writeError (const char * line)
 {
-    UInt8 stringEnd = 0;
-    for (stringEnd = 0; stringEnd < DISPLAY_MAX_LENGTH; ++stringEnd)
-    {
-        if ('\0' == line[stringEnd])
-        {
-            break;
-        }
-    }
-
-    Display_write(line, stringEnd);
+    Display_write(line);
 }
 
 static void writeSingleCharacter(UInt8 glyph)

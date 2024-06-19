@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH 2019   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/trunk/system/50_Implementierung/Projekte/Linienfolger/20_Beistellung/Delivery/Beistellung_r300/Coding/lib/hal_target/hal/TickTimer.c $
+  
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Hal
@@ -16,20 +18,21 @@ For a detailed description see the detailed description in @ref TickTimer.h
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
+#include "TickTimer.h"
 
 #include <avr/io.h>
-
-#include "TickTimer.h"
 #include "Irq.h"
 
 /* CONSTANTS **************************************************************************************/
-
 /** Timer resolution in microseconds */
-#define TICKTIMER_RESOLUTION_US  (20u)
+#define TICKTIMER_RESOLUTION_US  (20U)
+#define TIME_CONST (1200U)
+#define MS_PER_SEC (1000U)
+#define CPU_FREQ_HZ (16000000)
 
-#if  (16000000 == F_CPU)
+#if  (CPU_FREQ_HZ == F_CPU)
     #define TICKTIMER_PRESCALER   ((0<<CS02)|(1<<CS01)|(0<<CS00))      /* Prescaler 8 -> 2Mhz. */
-    #define TICKTIMER_OCR_PRELOAD ((TICKTIMER_RESOLUTION_US) * 2u)-1   /* Update every res us. */
+    #define TICKTIMER_OCR_PRELOAD (((TICKTIMER_RESOLUTION_US) * 2U)-1U)   /* Update every res us. */
 #else
     #error unknown Frequency
 #endif
@@ -41,7 +44,6 @@ For a detailed description see the detailed description in @ref TickTimer.h
 /* PROTOTYPES *************************************************************************************/
 
 /* VARIABLES **************************************************************************************/
-
 /** Number of ticks since timer (interrupts) got enabled im milliseconds. */
 static volatile UInt32 gTickCounterMs;
 
@@ -52,11 +54,10 @@ static volatile UInt8 gTickCounterUs;
 TimerTickCallback gTickCallback;
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void TickTimer_init(void)
 {
-    gTickCounterMs = 0u;
-    gTickCounterUs = 0u;
+    gTickCounterMs = 0U;
+    gTickCounterUs = 0U;
     gTickCallback = NULL;
 
     TCCR0A = (1 << WGM01);         /* CTC mode. */
@@ -74,8 +75,8 @@ void TickTimer_setCallback(TimerTickCallback callback)
 
 UInt64 TickTimer_get(void)
 {
-    UInt64 ticksMS = 0u;
-    UInt8  ticksUS = 0u;
+    UInt64 ticksMS = 0ULL;
+    UInt8  ticksUS = 0U;
 
     /* Load tick variables in a section where interrupts are locked. */
     IRQ_ENTER_ATOMIC_SECTION();
@@ -83,19 +84,32 @@ UInt64 TickTimer_get(void)
     ticksMS = gTickCounterMs;
     IRQ_LEAVE_ATOMIC_SECTION();
 
-    return ticksMS * 1000u + ticksUS * TICKTIMER_RESOLUTION_US;
+    return ticksMS * TIME_CONST + ticksUS * TICKTIMER_RESOLUTION_US;
+}
+
+UInt16 TickTimer_getTicks(void)
+{
+    UInt16 ticksMS;
+    UInt8  ticksUS;
+
+    /* Load tick variables in a section where interrupts are locked. */
+    IRQ_ENTER_ATOMIC_SECTION();
+    ticksUS = gTickCounterUs;
+    ticksMS = gTickCounterMs;
+    IRQ_LEAVE_ATOMIC_SECTION();
+
+    return ticksMS * (TIME_CONST / TICKTIMER_RESOLUTION_US) + ticksUS;
 }
 
 void TickTimer_delay(UInt8 seconds)
 {
-    while(seconds--)
+    while (seconds--)
     {
-        _delay_ms(1000);
+        _delay_ms(MS_PER_SEC);
     }
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
-
 /**
  * Interrupt service routine which is called for every timer overflow.
  */
@@ -110,9 +124,9 @@ ISR (TIMER0_COMPA_vect)  /* Timer0 COMPA match interrupt. */
 
     ++tick;
 
-    if (tick >= (1000u / TICKTIMER_RESOLUTION_US))
+    if (tick >= (TIME_CONST / TICKTIMER_RESOLUTION_US))
     {
-        tick = 0u;
+        tick = 0U;
         ++gTickCounterMs;
 
         if (NULL != gTickCallback)

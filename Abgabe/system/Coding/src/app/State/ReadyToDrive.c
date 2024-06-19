@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       ReadyToDrive.c
@@ -11,8 +11,9 @@
 /* INCLUDES ***************************************************************************************/
 #include "ReadyToDrive.h"
 
-#include "service/Display.h"
+#include "Common/Debug.h"
 #include "service/Button.h"
+#include "service/Display.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -22,46 +23,39 @@
 
 /* PROTOTYPES *************************************************************************************/
 
-static bool wasButtonPressed(ButtonID);
-
 /* VARIABLES **************************************************************************************/
 
-static ButtonState lastState = BUTTON_STATE_UNKNOWN;
-
 /* EXTERNAL FUNCTIONS *****************************************************************************/
+void ReadyToDrive_activateButtons(void)
+{
+    Button_init();
+}
 
 EventEnum ReadyToDrive_checkStateOfButtons(void)
 {
     EventEnum retEvent = NO_EVENT_HAS_HAPPEND;
 
-    if (TRUE == wasButtonPressed(BUTTON_ID_A))
+    /* Convert the application errors to those of the error handler */
+    if (BUTTON_STATE_TRIGGERED == Button_getState(BUTTON_ID_A))
     {
         retEvent = START_BUTTON_HAS_BEEN_RELEASED;
     }
-    else if (TRUE == wasButtonPressed(BUTTON_ID_B))
+    else if (BUTTON_STATE_TRIGGERED == Button_getState(BUTTON_ID_B))
     {
         retEvent = PARAM_BUTTON_HAS_BEEN_RELEASED;
     }
-    else if (TRUE == wasButtonPressed(BUTTON_ID_C))
+    else if (BUTTON_STATE_TRIGGERED == Button_getState(BUTTON_ID_C))
     {
         retEvent = CALIBRATION_BUTTON_HAS_BEEN_RELEASED;  
     }
     
     return retEvent;
 }
-/* INTERNAL FUNCTIONS *****************************************************************************/
 
-bool wasButtonPressed(ButtonID ID)
+void ReadyToDrive_deactivateButtons(void)
 {
-    bool retBool = FALSE;
-
-    ButtonState activeState = Button_getState(ID);
-    
-    if (BUTTON_STATE_PRESSED == lastState && BUTTON_STATE_RELEASED == activeState)
-    {
-        retBool = TRUE;
-    }
-    lastState = activeState;
-
-    return retBool;
+    /* Deinitialize the buttons because they are not needed anymore */
+    Button_deinit();
 }
+
+/* INTERNAL FUNCTIONS *****************************************************************************/

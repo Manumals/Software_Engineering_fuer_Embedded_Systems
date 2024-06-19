@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       DisplayLapTime.h
@@ -12,8 +12,9 @@
 #define DISPLAYLAPTIME_H
 
 /* INCLUDES ***************************************************************************************/
-#include "os/SoftTimer.h"
 #include "app/EventEnum.h"
+#include "os/SoftTimer.h"
+
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
@@ -25,7 +26,6 @@
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 /** Stop the lapTime timer, the power to the motors and emits a short beep
  * entry function of the state
  * @param[in] lapTimer The lap timer with the completed lap time
@@ -36,7 +36,6 @@ extern EventEnum DisplayLapTime_stopAfterLap(SoftTimer* lapTimer);
 /** Display the laptime on the OLED-display
 * exit function of the state
 */
-extern void DisplayLapTime_displayLapTime(SoftTimer* lapTimer);
+extern EventEnum DisplayLapTime_displayLapTime(SoftTimer* lapTimer);
 
 #endif /* DISPLAYLAPTIME_H */
-

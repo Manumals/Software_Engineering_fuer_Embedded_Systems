@@ -21,11 +21,9 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
-
 /** Diameter of installed wheels. */
 #define DRIVE_CONTROL_WHEEL_DIAMETER_MM             (38l)
 
@@ -38,7 +36,6 @@ extern "C"
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
 /** Contains all available motors. */
 typedef enum tag_DriveControlMotorID
 {
@@ -58,7 +55,6 @@ typedef enum tag_DriveControlDirection
 typedef Int32 MotorEncoderCounter;
 
 /* PROTOTYPES *************************************************************************************/
-
 /**
  * Initialize module.
  */

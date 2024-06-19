@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       DriveHandler.c
@@ -11,37 +11,27 @@
 /* INCLUDES ***************************************************************************************/
 #include "DriveHandler.h"
 
+#include "Common/Debug.h"
 #include "Common/Types.h"
+#include "hal/TickTimer.h"
 #include "service/DriveControl.h"
 #include "State/SetParameters.h"
-#include "State/CalibrateLineSensors.h"
 
 /* CONSTANTS **************************************************************************************/
-#define OPTIMAL_POS (2000U)
-#define SENSOR_WEIGHT_SCALE (1000U)
+/** Weight increment per line sensor to build the weighted average for position calculation */
+#define SENSOR_WEIGHT_SCALE ((LINESENSOR_NORMALIZED_RANGE) + 1U)
+/** Optimal position - the middle between the minimum and maximum position */
+#define POS_OPTIMAL ((LINESENSOR_COUNT)/2U * (SENSOR_WEIGHT_SCALE))
+/** Minimum possible position determined by the position calculation */
+#define POS_MIN (0U)
+/** Maximum possible position determined by the position calculation */
+#define POS_MAX (((LINESENSOR_COUNT)-1U) * (SENSOR_WEIGHT_SCALE))
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
-
-/**
- * Determine position of line under sensor.
- *
- * This function uses a weighted average to compute a logical line position. The value moves from
- * 0 to 4000 if the line moves from left to right of the robot.
- * https://en.wikipedia.org/wiki/Weighted_arithmetic_mean
- *
- *     0 * sensor1 + 1000 * sensor1 + 2000 * sensor2 + ... + 4000 * sensor4
- *     ----------------------------------------------------------------
- *                      sum(sensor0, ... , sensor4)
- *
- * @param sensorValues the current sensor values.
- * @return logical position between 0 and 4000.
- */
-static UInt32 calculatePosition(const LineSensorValues *sensorValues);
-
 /**
  * Controller loop to calculate motor speeds
  * 
@@ -49,107 +39,186 @@ static UInt32 calculatePosition(const LineSensorValues *sensorValues);
  * @param[out] leftSpeed New speed for left motor
  * @param[out] rightSpeed New speed for right motor
  */
-static void regulateSpeed(Int32 posError, UInt16 * leftSpeed, UInt16 * rightSpeed);
+static void regulateSpeed(Int16 posError, UInt8 * leftSpeed, UInt8 * rightSpeed);
 
 /* VARIABLES **************************************************************************************/
-UInt32 gCurrentPos = OPTIMAL_POS;
-UInt32 gLastPosition = OPTIMAL_POS;
-UInt16 gLeftSpeed, gRightSpeed;
-Int16 gLastError = 0;
+/** Store last position for DriveHandler_calculatePosition to return if no new position can be calculated
+ *  because of insufficient line sensor data */
+static UInt16 gLastPosition = POS_OPTIMAL;
 
+#ifndef PID_D_INACTIVE
+    static Int16 gLastError = 0; /**< Store last error to be able to calculate derivative for PID */
+    static UInt16 gTickLast = 0U; /**< Store last tick to calculate current cycle time for PID */
+#endif
+
+#ifdef SHOW_DRIVE_CYCLE_TIMES_MINMAX
+    static UInt64 gDbgTickLast = 0ULL; /**< Store last tick to calculate current cycle time */
+    static UInt16 gDbgTicksMin = 0xFFFFU; /** Store minimum measures cycle time until now */
+    static UInt16 gDbgTicksMax = 0U; /** Store maximum measures cycle time until now*/
+#endif
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void DriveHandler_stopDriving(void)
 {
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, 0, DRIVE_CONTROL_FORWARD);
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, 0, DRIVE_CONTROL_FORWARD);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, 0U, DRIVE_CONTROL_FORWARD);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, 0U, DRIVE_CONTROL_FORWARD);
 }
 
 void DriveHandler_findGuideLine(void)
 {
-    ParamSet gParam = SetParameters_getCurrentParamSet();
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gParam.maxMotorSpeed, DRIVE_CONTROL_FORWARD);
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gParam.maxMotorSpeed, DRIVE_CONTROL_FORWARD);  
+    ParamSet param = SetParameters_getCurrentParamSet();
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, param.maxMotorSpeed, DRIVE_CONTROL_FORWARD);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, param.maxMotorSpeed, DRIVE_CONTROL_FORWARD);  
 }
 
 void DriveHandler_followGuideLine(const LineSensorValues *sensorValues)
 {
-    gCurrentPos = calculatePosition(sensorValues);
-    regulateSpeed(gCurrentPos - OPTIMAL_POS, &gLeftSpeed, &gRightSpeed);
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT, gLeftSpeed, DRIVE_CONTROL_FORWARD);
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, gRightSpeed, DRIVE_CONTROL_FORWARD);
+    static UInt8 speedLeft = 0U, speedRight = 0U;
+    Int16 currentPos = DriveHandler_calculatePosition(sensorValues);
+    regulateSpeed(currentPos - POS_OPTIMAL, &speedLeft, &speedRight);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT,  speedLeft,  DRIVE_CONTROL_FORWARD);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, speedRight, DRIVE_CONTROL_FORWARD);
 }
 
-/* INTERNAL FUNCTIONS *****************************************************************************/
-static UInt32 calculatePosition(const LineSensorValues *sensorValues)
+UInt8 DriveHandler_driveFastLap(UInt16 time, const LineSensorValues *sensorValues)
 {
-    UInt32 position = 0u;
-    UInt32 sum = 0u;
-    UInt32 weight = 0u;
-    Bool foundLine = FALSE;
+    const UInt16 NoMagicNumber = 18751U;
+    const UInt8  NoMagicNumbre = 100U;
+    const UInt8  NoMagicNuwber = 25U;
+    const UInt16 NoMagicBumner = 19100U;
+    const UInt8  NoMagicMunber = 8U;
+    const UInt8  NoMagicRumber = 0U;
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT,  NoMagicNumbre, DRIVE_CONTROL_FORWARD);
+    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, NoMagicNuwber, DRIVE_CONTROL_FORWARD);
 
-    for (UInt8 sensor = 0; sensor < LINESENSOR_COUNT; ++sensor)
+    if (((NoMagicBumner < time) && (CALIB_OVER_LINE(sensorValues->value[LINESENSOR_LEFT]))) || (NoMagicNumber < time))
     {
-        UInt32 val = sensorValues->value[sensor];
+        return NoMagicRumber;
+    } else {
+        return NoMagicMunber;
+    }
+}
+
+UInt16 DriveHandler_calculatePosition(const LineSensorValues *sensorValues)
+{
+    UInt16 retPos = 0U;
+    UInt16 sumWeighted = 0U;
+    UInt16 sumNormal = 0U;
+    Bool foundLineMid = FALSE;
+
+    for (UInt8 sensor = 1U; sensor < LINESENSOR_COUNT-1; sensor++)
+    {
+        UInt8 val = sensorValues->value[sensor];
 
         if (CALIB_OVER_LINE(val))
         {
-            foundLine = TRUE;
+            foundLineMid = TRUE;
         }
 
-        position += val * weight;
-        sum += val;
-
-        weight += SENSOR_WEIGHT_SCALE;
+        sumWeighted += val * sensor;
+        sumNormal += val;
     }
 
-    if (!foundLine)
+    Bool foundLineLft = CALIB_OVER_LINE(sensorValues->value[LINESENSOR_LEFT]);
+    Bool foundLineRgt = CALIB_OVER_LINE(sensorValues->value[LINESENSOR_RIGHT]);
+
+    if (!foundLineMid)
     {
-        position = gLastPosition;
+        if (foundLineLft == foundLineRgt)
+        {
+            retPos = gLastPosition;
+        } else {
+            retPos = foundLineLft ? POS_MIN : POS_MAX;
+            gLastPosition = retPos;
+        }
+    } else {
+        /* build weighted average, SENSOR_WEIGHT_SCALE was factored out before for better performance */
+        retPos = ((UInt32)sumWeighted) * SENSOR_WEIGHT_SCALE / sumNormal;
+        gLastPosition = retPos;
+    }
+
+    return retPos;
+}
+
+/* INTERNAL FUNCTIONS *****************************************************************************/
+static void regulateSpeed(Int16 error, UInt8 * leftSpeed, UInt8 * rightSpeed)
+{
+    #ifdef SHOW_DRIVE_CYCLE_TIMES_MINMAX
+        //Get min and max time between calls of this function
+        UInt64 currTick = TickTimer_get();
+        if (0ULL != gDbgTickLast)
+        {
+            UInt16 ticks = (currTick - gDbgTickLast);
+            #ifdef SHOW_DRIVE_CYCLE_TIMES
+                Debug_showMsgNum(ticks, "t");
+                currTick = 0ULL; //Displaying stuff takes long and affects therefore next measured cycle time
+            #endif
+
+            Bool change = FALSE;
+            if (gDbgTicksMax < ticks) {
+                gDbgTicksMax = ticks;
+                change = TRUE;
+            }
+            if (gDbgTicksMin > ticks) {
+                gDbgTicksMin = ticks;
+                change = TRUE;
+            }
+            if (change) {
+                currTick = 0ULL; //Displaying stuff takes long and affects therefore next measured cycle time
+                Debug_showMinMax(gDbgTicksMin, gDbgTicksMax);
+            }
+        }
+        gDbgTickLast = currTick;
+    #endif
+
+
+
+    ParamSet param = SetParameters_getCurrentParamSet();
+
+    #ifndef PID_D_INACTIVE
+        /* cycle times can differ by a factor of 2 or more, this must be compensated for PidD and PidI.
+        For example LineSensor_readRaw is way faster if no line is detected.
+        This means without compensation the PID would be different if lines are detected then if they are not.*/
+        UInt16 tickNew = TickTimer_getTicks();
+        UInt16 ticks = tickNew - gTickLast;
+        gTickLast = tickNew;
+    #endif
+
+    /* PID controller */
+    Int16 proportional = error * param.pidP / 32;
+    //Int32 integral += error;  /* decreases the remaining error over time, but it's unimportant if the line is followed exactly */
+    #ifdef PID_D_INACTIVE
+        Int16 speedDifference = proportional;
+    #else
+        Int16 derivative   = ((Int32)(error - gLastError)) * param.pidD / ticks;
+        Int16 speedDifference = proportional - derivative;
+        gLastError = error;
+    #endif
+
+
+    /* Begin with the maximum allowed motor speed,
+    subtract the speedDifference from the correct side,
+    considering the minimum allowed speed value */
+    UInt8 left = param.maxMotorSpeed;
+    UInt8 right = param.maxMotorSpeed;
+
+    if (speedDifference >= right)
+    {
+        right = 0U;
+    }
+    else if (speedDifference <= -left)
+    {
+        left = 0U;
+    }
+    else if (0 <= speedDifference)
+    {
+        right -= speedDifference;
     }
     else
     {
-        /* build weighted average */
-        position /= sum;
-        gLastPosition = position;
+        left += speedDifference;
     }
 
-    return position;
-}
-
-static void regulateSpeed(Int32 error, UInt16 * leftSpeed, UInt16 * rightSpeed)
-{
-    ParamSet gParam = SetParameters_getCurrentParamSet();
-    /* PID controller */
-    Int32 proportional = (error * gParam.proNumerator) / gParam.proDenominator;
-    Int32 derivative   = ((error - gLastError) * gParam.derNumerator) / gParam.derDenominator;
-    Int32 integral     = 0;  /* not needed */
-    Int32 speedDifference = proportional + derivative + integral;
-
-    Int32 left = gParam.maxMotorSpeed + speedDifference;
-    Int32 right = gParam.maxMotorSpeed - speedDifference;
-
-    if (left < 0)
-    {
-        left = 0;
-    }
-    if (right < 0)
-    {
-        right = 0;
-    }
-
-    if (left > gParam.maxMotorSpeed)
-    {
-        left = gParam.maxMotorSpeed;
-    }
-    if (right > gParam.maxMotorSpeed)
-    {
-        right = gParam.maxMotorSpeed;
-    }
-
-    *leftSpeed = left;
+    *leftSpeed  = left;
     *rightSpeed = right;
-
-    gLastError = error;
 }

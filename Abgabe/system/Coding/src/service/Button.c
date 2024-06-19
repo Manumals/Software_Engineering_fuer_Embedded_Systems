@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH 2019   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/trunk/system/50_Implementierung/Projekte/Linienfolger/20_Beistellung/Delivery/Beistellung_r300/Coding/lib/service_target/service/Button.c $
+
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Service
@@ -16,8 +18,8 @@ For a detailed description see the detailed description in @ref Button.h
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Button.h"
+
 #include "os/Task.h"
 #include "os/SoftTimer.h"
 #include "os/Scheduler.h"
@@ -26,9 +28,8 @@ For a detailed description see the detailed description in @ref Button.h
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
-
 /** Minimum time for a stable button input value */
-#define BUTTON_DEBOUNCE_DELAY_MS (100u)
+#define BUTTON_DEBOUNCE_DELAY_MS (20U)
 
 /* TYPES ******************************************************************************************/
 /** List of available button debouncing states. */
@@ -42,7 +43,6 @@ typedef enum tag_ButtonDebounceState
 } ButtonDebounceState;
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Debounce task worker function.
  *
  * @param[in] data Instance data (unused).
@@ -78,7 +78,6 @@ static void setState (ButtonID id, ButtonState state);
 
 
 /* VARIABLES **************************************************************************************/
-
 /** Debounced state for each button. */
 static ButtonState gButtonStates[BUTTON_ID_MAX];
 
@@ -91,11 +90,7 @@ static SoftTimer gDebounceTimer;
 /** debounce state machine state for each button. */
 static ButtonDebounceState gDebounceState[BUTTON_ID_MAX];
 
- 
-
-
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void Button_init(void)
 {
     for (UInt8 i = 0; i < BUTTON_ID_MAX; ++i)
@@ -110,7 +105,14 @@ void Button_init(void)
 
     Task_init(&gDebounceTask, gDebounceTaskWorker, TASK_STATE_RUNNING, NULL);
     Scheduler_addTask(&gDebounceTask);
-    
+}
+
+void Button_deinit(void)
+{
+    Scheduler_removeTask(&gDebounceTask);
+
+    SoftTimer_Stop(&gDebounceTimer);
+    SoftTimerHandler_unRegister(&gDebounceTimer);
 }
 
 ButtonState Button_getState(ButtonID id)
@@ -151,7 +153,6 @@ void setState(ButtonID id, ButtonState newState)
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
-
 static void gDebounceTaskWorker(void * data)
 {
     (void)data;

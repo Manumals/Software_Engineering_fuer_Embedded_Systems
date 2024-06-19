@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       DriveOverGap.h
@@ -11,8 +11,8 @@
 #define DRIVEOVERGAP_H
 
 /* INCLUDES ***************************************************************************************/
-#include "os/SoftTimer.h"
 #include "app/EventEnum.h"
+#include "os/SoftTimer.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -25,7 +25,6 @@
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 /** Saves the time of the lapTimer where the state is called
 * entry function of the state
 * @param[in] lapTimer The lap timer with the current lap time

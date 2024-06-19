@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       ErrorHandlerState.c
@@ -11,9 +11,11 @@
 /* INCLUDES ***************************************************************************************/
 #include "ErrorHandlerState.h"
 
+#include <util/delay.h>
 #include "app/DriveHandler.h"
-#include "service/Buzzer.h"
+#include "Common/Debug.h"
 #include "os/ErrorHandler.h"
+#include "service/Buzzer.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -26,7 +28,6 @@
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void ErrorHandlerState_callErrorHandler(EventEnum errorReason)
 {
     /* Stops the power supply to the DriveMotors */
@@ -34,6 +35,8 @@ void ErrorHandlerState_callErrorHandler(EventEnum errorReason)
 
     /* The AlarmSignal is played on the Buzzer */
     Buzzer_beep(BUZZER_ALARM);
+
+    LineSensor_disableEmitter();
 
     /* An error message is displayed on the OledDisplay */
     ErrorHandlerErrorCode errorCode;
@@ -57,11 +60,19 @@ void ErrorHandlerState_callErrorHandler(EventEnum errorReason)
     case DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG:
         errorCode = ERRORHANDLER_DRIVING_TIMER_START_FAIL;
         break;
+    case LAPTIMER_INIT_FAILED:
+        errorCode = ERRORHANDLER_FINISH_TIMER_INIT_FAIL;
+        break;
     default:
         errorCode = ERRORHANDLER_UNKNOWN_ERROR;
         break;
     }
-    ErrorHandler_halt(errorCode);
+    ErrorHandler_show(errorCode);
+}
+
+void ErrorHandlerState_waitForReset(void)
+{
+    /* Do nothing and return, so the scheduler still works */
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/

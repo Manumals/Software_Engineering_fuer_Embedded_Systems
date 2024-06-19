@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       InitializeMcu.h
@@ -24,7 +24,6 @@
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 /** Initialize the microcontroller with all required variables and inits
 * entry functio of the state
 * @return INIZALIZATION_DONE : The initialization of the MCU is complete 

@@ -15,14 +15,13 @@ For a detailed description see the detailed description in @ref SoftTimer.h.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
 #include "os/SoftTimer.h"
+
 #include "hal/TickTimer.h"
 
 /* CONSTANTS **************************************************************************************/
-
 /** Maximum number of soft timers */
-#define SOFT_TIMER_MAX_TIMER (10u)
+#define SOFT_TIMER_MAX_TIMER (5U)
 
 #ifdef TARGET_NATIVE
     #define ATOMIC_BLOCK(argument)
@@ -37,17 +36,15 @@ For a detailed description see the detailed description in @ref SoftTimer.h.
 /* PROTOTYPES *************************************************************************************/
 
 /* VARIABLES **************************************************************************************/
-
 /** Storage for soft timers. */
 static SoftTimer * gSoftTimer[SOFT_TIMER_MAX_TIMER];
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void SoftTimer_init(SoftTimer* pSoftTimer)
 {
     pSoftTimer->state = SOFT_TIMER_UNREGISTERED;
-    pSoftTimer->counter = 0u;
-    pSoftTimer->threshHold = 0u;
+    pSoftTimer->counter = 0U;
+    pSoftTimer->threshHold = 0U;
 }
 
 SoftTimer_Ret SoftTimer_start(SoftTimer* pSoftTimer, UInt16 thresHold)
@@ -81,7 +78,7 @@ SoftTimer_Ret SoftTimer_Stop(SoftTimer* pSoftTimer)
 
 void SoftTimer_Update(SoftTimer* pSoftTimer)
 {
-    if ((SOFT_TIMER_RUNNING == pSoftTimer->state) && (0u != pSoftTimer->counter))
+    if ((SOFT_TIMER_RUNNING == pSoftTimer->state) && (0U != pSoftTimer->counter))
     {
         --pSoftTimer->counter;
     }
@@ -106,11 +103,9 @@ UInt16 SoftTimer_get(SoftTimer * pSoftTimer)
 
 void SoftTimerHandler_init()
 {
-    UInt8 index = 0u;
-
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        for (index = 0u; index < SOFT_TIMER_MAX_TIMER; ++index)
+        for (UInt8 index = 0U; index < SOFT_TIMER_MAX_TIMER; ++index)
         {
             gSoftTimer[index] = NULL;
         }
@@ -120,10 +115,10 @@ void SoftTimerHandler_init()
 SoftTimer_Ret SoftTimerHandler_register(SoftTimer * pNewSoftTimer)
 {
     UInt8 slot = SOFT_TIMER_MAX_TIMER;
-    UInt8 index = 0u;
+    UInt8 index = 0U;
     SoftTimer_Ret result = SOFTTIMER_RET_NOMORETIMERS;
 
-    for (index = 0u; index < SOFT_TIMER_MAX_TIMER; ++index)
+    for (index = 0U; index < SOFT_TIMER_MAX_TIMER; ++index)
     {
         SoftTimer * pTimer = gSoftTimer[index];
         if (pTimer == pNewSoftTimer)
@@ -158,9 +153,8 @@ SoftTimer_Ret SoftTimerHandler_register(SoftTimer * pNewSoftTimer)
 SoftTimer_Ret SoftTimerHandler_unRegister(SoftTimer * pSoftTimerToRemove)
 {
     SoftTimer_Ret result = SOFTTIMER_RET_UNKNOWNTIMER;
-    UInt8 index = 0u;
 
-    for (index = 0u; index < SOFT_TIMER_MAX_TIMER; ++index)
+    for (UInt8 index = 0U; index < SOFT_TIMER_MAX_TIMER; ++index)
     {
         SoftTimer * pTimer = gSoftTimer[index];
 
@@ -180,13 +174,11 @@ SoftTimer_Ret SoftTimerHandler_unRegister(SoftTimer * pSoftTimerToRemove)
 
 void SoftTimerHandler_update()
 {
-    UInt8 index = 0u;
-
-    for (index = 0u; index < SOFT_TIMER_MAX_TIMER; ++index)
+    for (UInt8 index = 0U; index < SOFT_TIMER_MAX_TIMER; ++index)
     {
         SoftTimer * pTimer = gSoftTimer[index];
 
-        if ((NULL != pTimer) &&  (0u != pTimer->counter) && (SOFT_TIMER_RUNNING == pTimer->state))
+        if ((NULL != pTimer) &&  (0U != pTimer->counter) && (SOFT_TIMER_RUNNING == pTimer->state))
         {
             --pTimer->counter;
         }
@@ -195,7 +187,7 @@ void SoftTimerHandler_update()
 
 UInt64 SoftTimer_getTimestampMs()
 {
-    return TickTimer_get() / 1000u;
+    return TickTimer_get() / 1000U;
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/

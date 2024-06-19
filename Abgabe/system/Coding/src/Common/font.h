@@ -1,3 +1,9 @@
+#ifndef FONT_H
+#define FONT_H
+
+//#include <avr/pgmspace.h>
+//#include "Common/Types.h"
+
 /// Note: This font is defined with the weak attribute, so if you want to
 /// override it you don't need to edit this file.  You can copy this file into
 /// your sketch directory, remove "__attribute__((weak))", and then make any
@@ -6,7 +12,7 @@
 /// Note: The non-ASCII characters 128-255 are not included in this default
 /// font.  You can use them to get a lot of extra custom characters if you
 /// override the font definition.
-const uint8_t pololuOledFont[96][5] PROGMEM = {
+const UInt8 pololuOledFont[96][5] PROGMEM = {
     // First 32 characters omitted because they are custom or blank.
 
     // 0x20 space
@@ -777,3 +783,5 @@ const uint8_t pololuOledFont[96][5] PROGMEM = {
         0b00001000,
         0b00001000},
 };
+
+#endif  /* FONT_H */

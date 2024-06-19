@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH 2019   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/branches/%23OLED/system/Coding/src/service/Display.h $
+
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Service
@@ -21,17 +23,19 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
+#include "Common/Debug.h"
+#include "service/LineSensor.h"
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
+#define DISPLAY_MAX_LENGTH (21U) /**< 0..20 (DISPLAY_MAX_COLUMNS / DISPLAY_CHARACTER_WITDH) */
+#define DISPLAY_MAX_LINES (8U) /**< 0..7 */
 
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initialize the display module.
  */
 extern void Display_init (void);
@@ -59,19 +63,41 @@ extern void Display_home (void);
  */
 extern void Display_gotoxy (UInt8 x, UInt8 y);
 
-/** Write on the display.
+/** Write text on the display.
+*
+* @param[in] line The text to display.
+*/
+void Display_write(const char * line);
+
+/** Write text with given length on the display.
 *
 * @param[in] line The text to display.
 * @param[in] length The length of the text to display (1..21).
 */
-void Display_write(const char * line, UInt8 length);
+void Display_writeWithLength(const char * line, UInt8 length);
 
+/** Write custom data on the display
+*
+* @param[in] line The columns to display
+* @param[in] length The length of the columns to display
+*/
+void Display_writeData(const UInt8 * cols, UInt8 length);
 
 /** Write a bar char with given height.
  *
  * @param[in] height The height of the bar (1..21).
  */
-extern void Display_writeBar (UInt8 height);
+extern void Display_writeCharBar (UInt8 height);
+
+#ifdef DEBUG_H
+/** Write a bar with given width.
+ *
+ * @param[in] height The width of the bar (0..4000).
+ */
+void Display_writeBar(UInt32 width);
+
+void Display_write5Bars(LineSensorValues * sensorValues, UInt8 line);
+#endif
 
 #ifdef __cplusplus
 }

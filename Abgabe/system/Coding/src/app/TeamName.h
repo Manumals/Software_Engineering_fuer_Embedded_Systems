@@ -2,24 +2,66 @@
   (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
- * @file       InitializeMcu.c
+ * @file       InitializeMcu.h
  *
- *    Module initializes the microcomputingunit and its components
+ *    Module stores the teamName
  */
 /**************************************************************************************************/
+#ifndef TEAM_NAME_H
+#define TEAM_NAME_H
 
 /* INCLUDES ***************************************************************************************/
-#include "InitializeMcu.h"
-
-#include "app/State/SetParameters.h"
-#include "app/TeamName.h"
-#include "hal/Hal.h"
-#include "os/Os.h"
-#include "service/Button.h"
-#include "service/Display.h"
-#include "service/Service.h"
+#include <avr/pgmspace.h>
+#include "Common/Types.h"
 
 /* CONSTANTS **************************************************************************************/
+/** Constant only in program memory that contains the data to print the unicode team name on the display */
+const UInt8 teamName[39] PROGMEM =
+{
+    0b01111111,
+    0b00001100,
+    0b00001100,
+    0b00110011,
+    0b00110011,
+    0b00001100,
+    0b00001100,
+    0b00110011,
+    0b00110011,
+
+    0b00000000,
+    0b00000000,
+    0b00000000,
+
+    0b00100100,
+    0b00010010,
+    0b00010010,
+    0b00010010,
+    0b00100100,
+    0b01001000,
+    0b01001000,
+    0b01001000,
+    0b00100100,
+
+    0b00000000,
+    0b00000000,
+
+    0b00110000,
+    0b01001000,
+    0b01001000,
+    0b00110000,
+    0b00000100,
+    0b01010010,
+    0b01010010,
+    0b01010010,
+    0b00000100,
+    0b00110000,
+    0b01001000,
+    0b01001000,
+    0b00110000,
+    0b00000110,
+    0b00011000,
+    0b01100000,        
+};
 
 /* MACROS *****************************************************************************************/
 
@@ -30,28 +72,5 @@
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-EventEnum InitializeMcu_initializeAll(void)
-{
-    /* The following lines are already done in main.c */
-    //Hal_init();     /* Initialize HAL modules */
-    //OS_init();      /* Initialize OS modules */
-    //Service_init(); /* Initialize Service modules */
 
-    /* Deinit unused modules that were already initilized to save ressources */
-    Button_deinit();
-    LineSensor_deinit();
-
-    SetParameters_displayParamSet();
-
-    return INIZALIZATION_DONE;
-} 
-
-void InitializeMcu_displayTeamName(void)
-{
-    Display_gotoxy(0, 0);
-    Display_write("Team ");
-    /* The team name uses unicode chars, therefore the normal write won't work */
-    Display_writeData(teamName, sizeof(teamName));
-}
-
-/* INTERNAL FUNCTIONS *****************************************************************************/
+#endif  /* TEAM_NAME_H */

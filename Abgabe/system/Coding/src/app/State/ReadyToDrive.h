@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       ReadyToDrive.h
@@ -22,6 +22,10 @@
 /* PROTOTYPES *************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
+/** Activate the buttons
+* entry function of the state
+*/
+extern void ReadyToDrive_activateButtons(void);
 
 /** Wait for input from the user
 * do function of the state
@@ -31,5 +35,10 @@
 * @return NO_EVENT_HAS_HAPPEND : No event was triggered in the state
 */
 extern EventEnum ReadyToDrive_checkStateOfButtons(void);
+
+/** Deactivate the buttons
+* exit function of the state
+*/
+extern void ReadyToDrive_deactivateButtons(void);
 
 #endif /* READYTODRIVE_H */

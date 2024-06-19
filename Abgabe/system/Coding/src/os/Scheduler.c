@@ -16,14 +16,14 @@ For a detailed description see the detailed description in @ref Scheduler.h.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
 #include "os/Scheduler.h"
-#include "os/Task.h"
 
+#include "Common/Debug.h"
+#include "os/Task.h"
 #ifndef TARGET_NATIVE
-#include "hal/Irq.h"
+    #include "hal/Irq.h"
 #else
-#include "hal/TickTimer.h"
+    #include "hal/TickTimer.h"
 #endif
 
 /* CONSTANTS **************************************************************************************/
@@ -35,12 +35,10 @@ For a detailed description see the detailed description in @ref Scheduler.h.
 /* PROTOTYPES *************************************************************************************/
 
 /* VARIABLES **************************************************************************************/
-
 /** Storage for task structure pointer. */
 static Task * gTasks[SCHEDULER_MAX_TASKS];
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 Scheduler_Ret Scheduler_init(void)
 {
     /* Task data. */
@@ -57,16 +55,16 @@ void Scheduler_execute(void)
     #ifndef TARGET_NATIVE
     IRQ_ENABLE_INTERRUPTS();
 
-    while(1)
+    while (TRUE)
     #else
-    while(TickTimer_simulationStep())
+    while (TickTimer_simulationStep())
     #endif
     {
         for (UInt8 index = 0; index < SCHEDULER_MAX_TASKS; ++index)
         {
             Task * pTask = gTasks[index];
 
-            if ((NULL != pTask) && TASK_STATE_RUNNING == TASK_GET_STATE(pTask))
+            if ((NULL != pTask) && (TASK_STATE_RUNNING == TASK_GET_STATE(pTask)))
             {
                 TASK_EXECUTE(pTask);
             }
@@ -77,12 +75,12 @@ void Scheduler_execute(void)
 
 Scheduler_Ret Scheduler_addTask(Task * pNewTask)
 {
-    UInt8 index = 0;
+    UInt8 index = 0U;
     UInt8 slot = SCHEDULER_MAX_TASKS;
     Scheduler_Ret result = SCHEDULER_RET_NOMORETASKS;
 
     /* Check if task is already added and search free slot. */
-    for (index = 0; index < SCHEDULER_MAX_TASKS; ++index)
+    for (index = 0U; index < SCHEDULER_MAX_TASKS; ++index)
     {
         Task * pTask = gTasks[index];
 

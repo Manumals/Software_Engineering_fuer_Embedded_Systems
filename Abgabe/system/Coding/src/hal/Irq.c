@@ -14,12 +14,11 @@ This module provides interrupt support.
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
+#include "Irq.h"
 
 #include <util/atomic.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
-
-#include "Irq.h"
 
 /* CONSTANTS **************************************************************************************/
 
@@ -28,19 +27,16 @@ This module provides interrupt support.
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
-
 /**
  * Simple nop function.
  */
 static void nop (void);
 
 /* VARIABLES **************************************************************************************/
-
 /** IRQ handler for each interrupt. */
 static IrqCallback gCallBack[IRQ_MAX_ID];
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void Irq_init(void)
 {
     for (UInt8 i = 0; i < IRQ_MAX_ID; ++i)
@@ -49,11 +45,11 @@ void Irq_init(void)
     }
 
     /* Disable pin change interrupts PCINT0..7. */
-    PCICR = 0u;
-    PCMSK0 = 0u;
+    PCICR = 0U;
+    PCMSK0 = 0U;
 
     /* Disable external pin change interrupts INT3..0 and INT6. */
-    EIMSK = 0u;
+    EIMSK = 0U;
 }
 
 void Irq_enable(IrqID id)
@@ -126,7 +122,6 @@ void Irq_setCallback(IrqID id, IrqCallback callback)
 }
 
 /* INTERNAL FUNCTIONS *****************************************************************************/
-
 void nop(void)
 {
     /* Nothing to do. */

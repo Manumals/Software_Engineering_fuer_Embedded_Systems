@@ -22,7 +22,6 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
@@ -30,18 +29,16 @@ extern "C"
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
 /**< ID for the different PWM channels. */
 typedef enum tag_PwmID
 {
-    PWM_MOTOR_RIGHT = 0u,   /**< PWM for Right motor.           */
+    PWM_MOTOR_RIGHT = 0U,   /**< PWM for Right motor.           */
     PWM_MOTOR_LEFT,         /**< PWM for LEFT motor.            */
     PWM_BUZZER_NOTIFY,      /**< PWM for buzzer signal NOTIFY.  */
     PWM_BUZZER_ALARM        /**< PWM for buzzer signal ALARM.   */
 } PwmID;
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initializes a PWM generator module. */
 extern void Pwm_init (void);
 

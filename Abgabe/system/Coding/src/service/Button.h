@@ -1,6 +1,8 @@
 /***************************************************************************************************
   (c) NewTec GmbH 2019   -   www.newtec.de
   $URL: https://svn.newtec.zz/NTCampus/SW-Entwicklung/trunk/system/50_Implementierung/Projekte/Linienfolger/20_Beistellung/Delivery/Beistellung_r300/Coding/lib/service_target/service/Button.h $
+
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
 @addtogroup Service
@@ -21,7 +23,6 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
@@ -29,7 +30,6 @@ extern "C"
 /* MACROS *****************************************************************************************/
 
 /* TYPES ******************************************************************************************/
-
 /** List of available buttons. */
 typedef enum tag_ButtonID
 {
@@ -50,9 +50,11 @@ typedef enum tag_ButtonStatus
 } ButtonState;
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initialize the button module. */
 extern void Button_init (void);
+
+/** Deinitialize the button module. */
+extern void Button_deinit(void);
 
 /** Get debounced state of a button.
  *

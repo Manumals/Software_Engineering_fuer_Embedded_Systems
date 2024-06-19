@@ -16,7 +16,6 @@ For a detailed description see the detailed description in @ref Button.h
 ***************************************************************************************************/
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Hal.h"
 
 #include "hal/Gpio.h"
@@ -35,7 +34,6 @@ For a detailed description see the detailed description in @ref Button.h
 /* VARIABLES **************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 void Hal_init(void)
 {
     Gpio_init();

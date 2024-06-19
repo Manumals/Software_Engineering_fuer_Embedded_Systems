@@ -25,19 +25,16 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
-
 /** Check if timer is expired */
 #define SOFTTIMER_IS_EXPIRED(pSoftTimer) \
     ((0 == (pSoftTimer)->counter) && (SOFT_TIMER_RUNNING == (pSoftTimer)->state))
 
 /* TYPES ******************************************************************************************/
-
 /** Statuses of the soft timer api. */
 typedef enum
 {
@@ -69,7 +66,6 @@ typedef struct tag_SoftTimer
 
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initialize a soft timer structure.
  * @param[in] pSoftTimer  A soft timer structure.
  */

@@ -22,16 +22,13 @@ extern "C"
 #endif
 
 /* INCLUDES ***************************************************************************************/
-
 #include <util/atomic.h>
 #include <avr/interrupt.h>
-
 #include "Types.h"
 
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
-
 /** Enable hardware interrupts. */
 #define IRQ_ENABLE_INTERRUPTS()     sei()
 
@@ -45,7 +42,6 @@ extern "C"
 #define IRQ_LEAVE_ATOMIC_SECTION()  }
 
 /* TYPES ******************************************************************************************/
-
 /** IRQ sources. */
 typedef enum tag_IrqID
 {
@@ -58,7 +54,6 @@ typedef enum tag_IrqID
 typedef void (*IrqCallback)(void);
 
 /* PROTOTYPES *************************************************************************************/
-
 /** Initializes IRQ module. */
 extern void Irq_init (void);
 

@@ -1,5 +1,5 @@
 /***************************************************************************************************
-  (c) NewTec GmbH 2024   -   www.newtec.de
+  (c) Team 🏁~~ ō͡≡o\ (Maurice Ott, Simon Walderich, Thorben Päpke) 2024
 ***************************************************************************************************/
 /**
  * @file       CalibrateLineSensors.h
@@ -12,18 +12,16 @@
 
 /* INCLUDES ***************************************************************************************/
 #include "app/EventEnum.h"
+
 /* CONSTANTS **************************************************************************************/
 
 /* MACROS *****************************************************************************************/
-#define CALIB_NO_LINE(value) ((value) <= 500)
-#define CALIB_OVER_LINE(value) ((value) > 500)
 
 /* TYPES ******************************************************************************************/
 
 /* PROTOTYPES *************************************************************************************/
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
-
 /** Initializes all variables that are needed for the calibration 
 * entry function of the state
 */
@@ -36,5 +34,10 @@ extern void CalibrateLineSensors_initialize(void);
 * @return CALIBRATION_DONE : Calibration is complete
 */
 extern EventEnum CalibrateLineSensors_calibrateSensors(void);
+
+/** Deinitializes variables that are needed for the calibration 
+* exit function of the state
+*/
+extern void CalibrateLineSensors_deinitialize(void);
 
 #endif /*CALIBRATELINESENSORS_H*/
