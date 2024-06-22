@@ -21,6 +21,7 @@ StateCalibrateLineSensors --> StateErrorHandler : Calibration failed
 StateReadyToDrive --> StateSetParameters :ParamButton is released
 StateReadyToDrive --> StateDisplayCountdown : StartButton is released
 StateReadyToDrive --> StateCalibrateLineSensors : CalibrateButton is released
+StateReadyToDrive : entry / Activate buttons
 StateReadyToDrive : do / Wait for button input
 
 'StateDisplayCountdown'
@@ -75,8 +76,7 @@ StateErrorHandler: entry / Stop the power to the DriveMotors
 StateErrorHandler: entry / Play the AlarmSignal on the Buzzer
 StateErrorHandler: entry / Display error message on the OledDisplay
 StateErrorHandler: entry / Stop the processor
-
-note bottom of StateSetParameters
+note bottom of StateErrorHandler
 Processor is stopped after displaying the team name
 end note
 

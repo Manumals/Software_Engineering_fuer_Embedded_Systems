@@ -141,36 +141,39 @@ package "Application"  {
         CALIBRATION_FAILED,
         INIZALIZATION_FAILED,
         GUIDELINE_WAS_LOST,
+        LAPTIMER_INIT_FAILED,
         LAPTIME_IS_TOO_LONG,
         DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG,
         DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG
     }
 
     class DriveHandler {
-        -calculatePosition(const LineSensorValues*): UInt32
-        -regulateSpeed(Int32, UInt16*, UInt16*):void
-        -gCurrentPos: UInt32
         -gLastPosition: UInt32
-        -gLeftSpeed: UInt16
-        -gRightSpeed: UInt16
-        -gLastError: Int16
         +DriveHandler_stopDriving(void): void
         +DriveHandler_findGuideLine(void):void
         +DriveHandler_followGuideLine(LineSensorValues*): void
-    }
+        +DriveHandler_driveFastLap(UInt16 time, const LineSensorValues *sensorValues): UInt8
+        +DriveHandler_calculatePosition(const LineSensorValues *sensorValues): UInt16
+        -regulateSpeed(Int16 posError, UInt8 * leftSpeed, UInt8 * rightSpeed): void
+    }   
+    DriveHandler .[#LightCoral].> DriveControl
+    DriveHandler .[#LightCoral].> TickTimer
+    DriveHandler .[#LightCoral].> SetParameters
 
     class StateHandler {
         -gCurrentState: EventEnum
         -gCurrentState:StateEnum
         -gLapTimer: SoftTimer*
         -gEntryDone: Bool
-        -driveToStartEvent(EventEnum gCurrentEvent): void
-        -driveToFinishEvent(EventEnum gCurrentEvent): void
-        -driveOverGapEvent(EventEnum gCurrentEvent): void
-        -displayCountDownEvent(EventEnum gCurrentEvent): void 
-        -readyToDriveEvent(EventEnum gCurrentEvent): void
-        -calibrateLineSensorsEvent(EventEnum gCurrentEvent): void
+        -handleDriveToStartEvent(EventEnum currentEvent): void
+        -handleDriveToFinishEvent(EventEnum currentEvent): void
+        -handleDriveOverGapEvent(EventEnum currentEvent): void
+        -handleDisplayCountDownEvent(EventEnum currentEvent): void
+        -handleReadyToDriveEvent(EventEnum currentEvent): void
+        -handleCalibrateLineSensorsEvent(EventEnum currentEvent): void
         +StateHandler_process(void): void
+
+        
     }
 
     StateHandler ..> EventEnum
@@ -192,39 +195,52 @@ package "Application"  {
             +InitializeMcu_initializeAll(void): EventEnum 
             +InitializeMcu_displayTeamName(void): void 
         }
+        InitializeMcu .[#Blue].> Service
+        InitializeMcu .[#Blue].> HAL
 
         class CalibrateLineSensors {
             -gState: CalibrationState
-            -gResult: EventEnum
             -gTimer: SoftTimer
             +CalibrateLineSensors_initialize(void): void
             +CalibrateLineSensors_calibrateSensors(void): EventEnum
+            +void CalibrateLineSensors_deinitialize(void): void
         }
+        CalibrateLineSensors .[#red].> DriveHandler
+        CalibrateLineSensors .[#red].> LineSensor
+        CalibrateLineSensors .[#red].> TickTimer
+        CalibrateLineSensors .[#red].> Scheduler
+        CalibrateLineSensors .[#red].> SoftTimer
+        CalibrateLineSensors .[#red].> Task
+        CalibrateLineSensors .[#red].> DriveControl
 
         class ReadyToDrive {
-            -wasButtonPressed(ButtonID): Bool
-            -lastState: ButtonState
+            +ReadyToDrive_activateButtons(void): void
             +ReadyToDrive_checkStateOfButtons(void): EventEnum
+            +ReadyToDrive_deactivateButtons(void): void
         }
+        ReadyToDrive .[#green].> Display
+        ReadyToDrive .[#green].> Button
 
         class DriveToStart {
-            -gMaxTimeTimer: SoftTimer
+            -gTimeoutTimer: SoftTimer
             -gLapTimer: SoftTimer
-            -sensorValues: LineSensorValues
             +DriveToStart_startMotorsAndTimer(void): void
             +DriveToStart_followGuideLine(void): EventEnum
             +DriveToStart_stopTimer(void): void
             +DriveToStart_startTimerAndBeep(void): SoftTimer*
         }
+        DriveToStart .[#Brown].> SoftTimer
+        DriveToStart .[#Brown].> Buzzer
         DriveToStart .[#Brown].> DriveHandler
         DriveToStart .[#Brown].> LineSensor
-        DriveToStart .[#Brown].> SoftTimer
 
         class DriveToFinish {
             +DriveToFinish_followGuideLine(SoftTimer*): EventEnum
         }
         DriveToFinish .[#Violet].> DriveHandler
         DriveToFinish .[#Violet].> LineSensor
+        DriveToFinish .[#Violet].> SetParameters
+        DriveToFinish .[#Violet].> SoftTimer
 
         class DriveOverGap {
             -gEntryTime: UInt16
@@ -233,19 +249,26 @@ package "Application"  {
         }
         DriveOverGap .[#gold].> DriveHandler
         DriveOverGap .[#gold].> LineSensor
+        DriveOverGap .[#gold].> SoftTimer
 
         class DisplayCountdown {
             -gCountdownTimer: SoftTimer
-            -gLastTime: UInt8
+            -gLastTime_s: UInt8
             +DisplayCountdown_startCountdown(void): void
             +DisplayCountdown_displayCountdown(void): EventEnum
             +DisplayCountdown_stopCountdown(void): void
         }
+        DisplayCountdown .[#FireBrick].> Display
+        DisplayCountdown .[#FireBrick].> SoftTimer
 
         class DisplayLapTime {
             +DisplayLapTime_stopAfterLap(SoftTimer*): EventEnum
             +DisplayLapTime_displayLapTime(SoftTimer*): void
         }
+        DisplayLapTime .[#Olive].> SoftTimer
+        DisplayLapTime .[#Olive].> Buzzer
+        DisplayLapTime .[#Olive].> Display
+        DisplayLapTime .[#Olive].> DriveHandler
 
         class SetParameters {
             -gParamSetIdx: UInt8
@@ -253,18 +276,28 @@ package "Application"  {
             +SetParameters_setNextParamSet(void): void
             +SetParameters_displayParamSet(void): void
             +SetParameters_getCurrentParamSet(void): ParamSet
+            +SetParameters_setCurrentParamSet(ParamSet paramSet): void
+            +SetParameters_getCurrentParamSetIdx(void): UInt8
         }
+        SetParameters .[#LimeGreen].> SoftTimer
+        SetParameters .[#LimeGreen].> Display
 
         DriveHandler ..> SetParameters
 
         class ErrorHandlerState{
             +ErrorHandlerState_callErrorHandler(EventEnum): void
+            +ErrorHandlerState_waitForReset(void): void
         }
         note bottom of ErrorHandlerState
         The ErrorHandler does not require a return value, 
         as it was defined in the specifications that the 
         robot must always be reset if an error occurs
         end note
+
+        ErrorHandlerState .[#Orange].> Buzzer
+        ErrorHandlerState .[#Orange].> DriveHandler
+        ErrorHandlerState .[#Orange].> ErrorHandler
+
 
         InitializeMcu ..> EventEnum
         CalibrateLineSensors ..> EventEnum
@@ -282,40 +315,6 @@ package "Application"  {
     MainTask .left.> StateHandler
 
 }
-
-ReadyToDrive .[#green].> Display
-ReadyToDrive .[#green].> Button
-
-DisplayCountdown .[#FireBrick].> Display
-DisplayCountdown .[#FireBrick].> SoftTimer
-
-DisplayLapTime .[#Olive].> SoftTimer
-DisplayLapTime .[#Olive].> Buzzer
-DisplayLapTime .[#Olive].> Display
-
-SetParameters .[#LimeGreen].> SoftTimer
-SetParameters .[#LimeGreen].> Display
-
-DriveOverGap .[#gold].> SoftTimer
-
-DriveToFinish .[#Violet].> SoftTimer
-
-DriveToStart .[#Brown].> SoftTimer
-DriveToStart .[#Brown].> Buzzer
-
-ErrorHandlerState .[#Orange].> Buzzer
-ErrorHandlerState .[#Orange].> DriveControl
-ErrorHandlerState .[#Orange].> ErrorHandler
-
-CalibrateLineSensors .[#red].> DriveControl
-CalibrateLineSensors .[#red].> LineSensor
-
-InitializeMcu .[#Blue].> Service
-InitializeMcu .[#Blue].> HAL
-InitializeMcu .[#Blue].> Display
-
-DriveHandler .[#LightCoral].> DriveControl
-
 ' ++++++++++++++++++++++++++++++++
 ' Service
 
