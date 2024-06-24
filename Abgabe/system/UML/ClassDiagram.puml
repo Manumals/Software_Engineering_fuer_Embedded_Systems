@@ -158,7 +158,6 @@ package "Application"  {
     }   
     DriveHandler .[#LightCoral].> DriveControl
     DriveHandler .[#LightCoral].> TickTimer
-    DriveHandler .[#LightCoral].> SetParameters
 
     class StateHandler {
         -gCurrentState: EventEnum
@@ -171,9 +170,7 @@ package "Application"  {
         -handleDisplayCountDownEvent(EventEnum currentEvent): void
         -handleReadyToDriveEvent(EventEnum currentEvent): void
         -handleCalibrateLineSensorsEvent(EventEnum currentEvent): void
-        +StateHandler_process(void): void
-
-        
+        +StateHandler_process(void): void   
     }
 
     StateHandler ..> EventEnum
@@ -281,6 +278,7 @@ package "Application"  {
         }
         SetParameters .[#LimeGreen].> SoftTimer
         SetParameters .[#LimeGreen].> Display
+        DriveHandler .[#LightCoral].> SetParameters
 
         DriveHandler ..> SetParameters
 

@@ -48,7 +48,7 @@ StateDriveToFinish --> StateDisplayLapTime : StartFinishLine is recognized
 StateDriveToFinish : do / Follow the GuideLine 
 
 'StateDriveOverGap'
-StateDriveOverGap --> StateErrorHandler : State DriveOverGap is active for more than 5s [DriveOverGapTimer > 5s]
+StateDriveOverGap --> StateErrorHandler : State DriveOverGap is active for more than 5s or LapTimer is active for more than 20 seconds
 StateDriveOverGap  --> StateDriveToFinish : The GuideLine is recognized
 StateDriveOverGap: entry / Saves the time of the lapTimer
 StateDriveOverGap : do / The Robot searches for the GuideLine
