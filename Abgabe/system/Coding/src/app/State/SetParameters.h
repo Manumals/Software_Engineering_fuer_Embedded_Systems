@@ -56,6 +56,6 @@ extern void SetParameters_setCurrentParamSet(ParamSet paramSet);
 *
 * @return Current parameter set index
 */
-UInt8 SetParameters_getCurrentParamSetIdx(void);
+extern UInt8 SetParameters_getCurrentParamSetIdx(void);
 
 #endif /* SETPARAMETERS_H */
