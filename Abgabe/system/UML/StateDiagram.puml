@@ -42,19 +42,20 @@ StateDriveToStart: do / Follow the GuideLine
 StateDriveToStart: exit / Stop Timer DriveToStartTimer
 
 'StateDriveToFinish'
-StateDriveToFinish --> StateErrorHandler : LapTimer is active for more than 20 seconds
+StateDriveToFinish --> StateErrorHandler : LapTimer is active for more than 20 seconds or laptimer init failed
 StateDriveToFinish --> StateDriveOverGap : The GuideLine was lost
 StateDriveToFinish --> StateDisplayLapTime : StartFinishLine is recognized
 StateDriveToFinish : do / Follow the GuideLine 
 
 'StateDriveOverGap'
-StateDriveOverGap --> StateErrorHandler : State DriveOverGap is active for more than 5s or LapTimer is active for more than 20 seconds
+StateDriveOverGap --> StateErrorHandler : State DriveOverGap is active for more than 5s or LapTimer is active for more than 20 seconds or Laptimer init failed
 StateDriveOverGap  --> StateDriveToFinish : The GuideLine is recognized
 StateDriveOverGap: entry / Saves the time of the lapTimer
 StateDriveOverGap : do / The Robot searches for the GuideLine
 
 'StateDisplayLapTime
 StateDisplayLapTime  --> StateReadyToDrive : Power to the DriveMotors is stopped
+StateDisplayLapTime  --> StateErrorHandler : Laptimer init failed
 StateDisplayLapTime : entry / Stop the LapTimer
 StateDisplayLapTime : entry / Stop the power to the DriveMotors
 StateDisplayLapTime : entry / The Buzzer emits the ShortBeep
@@ -76,6 +77,7 @@ StateErrorHandler: entry / Stop the power to the DriveMotors
 StateErrorHandler: entry / Play the AlarmSignal on the Buzzer
 StateErrorHandler: entry / Display error message on the OledDisplay
 StateErrorHandler: entry / Stop the processor
+StateErrorHandler: do / Wait for reset
 note bottom of StateErrorHandler
 Processor is stopped after displaying the team name
 end note
