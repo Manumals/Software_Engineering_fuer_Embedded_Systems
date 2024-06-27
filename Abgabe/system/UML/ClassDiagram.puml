@@ -232,6 +232,7 @@ package "Application"  {
         DriveToStart .[#Brown].> LineSensor
 
         class DriveToFinish {
+            -gLineLostCount: UInt16
             +DriveToFinish_followGuideLine(SoftTimer*): EventEnum
         }
         DriveToFinish .[#Violet].> DriveHandler
