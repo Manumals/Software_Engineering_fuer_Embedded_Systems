@@ -80,18 +80,27 @@ void DriveHandler_followGuideLine(const LineSensorValues *sensorValues)
     DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, speedRight, DRIVE_CONTROL_FORWARD);
 }
 
-UInt8 DriveHandler_driveFastLap(UInt16 time, const LineSensorValues *sensorValues)
+UInt8 DriveHandler_driveFastLap(UInt16 time, const LineSensorValues *sensorValues, const Bool right)
 {
-    const UInt16 NoMagicNumber = 18751U;
+    const UInt16 NoMagicNumber = 18351U;
     const UInt8  NoMagicNumbre = 100U;
     const UInt8  NoMagicNuwber = 25U;
     const UInt16 NoMagicBumner = 19100U;
     const UInt8  NoMagicMunber = 8U;
     const UInt8  NoMagicRumber = 0U;
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT,  NoMagicNumbre, DRIVE_CONTROL_FORWARD);
-    DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, NoMagicNuwber, DRIVE_CONTROL_FORWARD);
+    if (right)
+    {
+        DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT,  NoMagicNumbre, DRIVE_CONTROL_FORWARD);
+        DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, NoMagicNuwber, DRIVE_CONTROL_FORWARD);
+    }
+    else
+    {
+        DriveControl_drive(DRIVE_CONTROL_MOTOR_LEFT,  NoMagicNuwber, DRIVE_CONTROL_FORWARD);
+        DriveControl_drive(DRIVE_CONTROL_MOTOR_RIGHT, NoMagicNumbre, DRIVE_CONTROL_FORWARD);
+    }
+    
 
-    if (((NoMagicBumner < time) && (CALIB_OVER_LINE(sensorValues->value[LINESENSOR_LEFT]))) || (NoMagicNumber < time))
+    if (((NoMagicBumner < time) && (CALIB_OVER_LINE(sensorValues->value[LINESENSOR_RIGHT*right]))) || (NoMagicNumber < time))
     {
         return NoMagicRumber;
     } else {

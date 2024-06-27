@@ -46,7 +46,7 @@ extern void DriveHandler_followGuideLine(const LineSensorValues *sensorValues);
 * @param[in] time The current lap time
 * @param[in] sensorValues Array with the line sensor values
 */
-extern UInt8 DriveHandler_driveFastLap(UInt16 time, const LineSensorValues *sensorValues);
+extern UInt8 DriveHandler_driveFastLap(UInt16 time, const LineSensorValues *sensorValues, const Bool right);
 
 /**
  * Determine position of line under sensor.

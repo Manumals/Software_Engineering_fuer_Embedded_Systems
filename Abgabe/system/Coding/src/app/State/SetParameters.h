@@ -14,7 +14,7 @@
 #include "Common/Types.h"
 
 /* CONSTANTS **************************************************************************************/
-#define PARAM_SETS_COUNT (13) /**< Amount of elements of the parameter set array */
+#define PARAM_SETS_COUNT (14) /**< Amount of elements of the parameter set array */
 
 /* MACROS *****************************************************************************************/
 

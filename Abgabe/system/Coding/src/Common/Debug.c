@@ -148,7 +148,7 @@ void Debug_showPosition()
         {
             UInt16 tmp = sensorValues.value[sens];
             tmp = (tmp + (DEC/2)) / DEC;
-            if (10 > tmp) {
+            if (DEC > tmp) {
                 txtPos++;
                 txt[txtPos++] = '0' + tmp;
             } else if ((DEC*DEC) > tmp) {

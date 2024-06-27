@@ -38,7 +38,7 @@ void DriveToStart_startMotorsAndTimer(void)
 {
     SoftTimer_init(&gTimeoutTimer);
     SoftTimerHandler_register(&gTimeoutTimer);
-    SoftTimer_start(&gTimeoutTimer, MAX_LAP_TIME_MS);
+    SoftTimer_start(&gTimeoutTimer, MAX_START_TIME_MS);
     
     LineSensor_enableEmitter();
 }

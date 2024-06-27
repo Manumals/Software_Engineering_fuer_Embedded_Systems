@@ -217,12 +217,17 @@ void StateHandler_process(void)
             gCurrentEvent = DisplayLapTime_stopAfterLap(gLapTimer); /* entry */
             if (POWER_TO_THE_MOTORS_HAS_BEEN_STOPPED == gCurrentEvent)
             {
-                if (NO_EVENT_HAS_HAPPEND == DisplayLapTime_displayLapTime(gLapTimer)) /* exit */
-                {
+                #ifdef GET_LAP_DATA
+                    if (NO_EVENT_HAS_HAPPEND == DisplayLapTime_displayLapTime(gLapTimer)) /* exit */
+                    {
+                        gCurrentState = STATE_READY_TO_DRIVE;
+                    } else {
+                        gCurrentState = STATE_DISPLAY_COUNTDOWN;
+                    }
+                #else
+                    DisplayLapTime_displayLapTime(gLapTimer);
                     gCurrentState = STATE_READY_TO_DRIVE;
-                } else {
-                    gCurrentState = STATE_DISPLAY_COUNTDOWN;
-                }
+                #endif
             }
         }
         break;
@@ -236,30 +241,30 @@ void StateHandler_process(void)
 static void handleDriveToStartEvent(EventEnum currentEvent)
 {
     if (DRIVE_TO_START_IS_ACTIVE_FOR_TOO_LONG == currentEvent)
+    {
+        gCurrentState = STATE_ERROR_HANDLER;
+        gEntryDone = FALSE;
+        DriveToStart_stopTimer(); /* exit */
+    }
+    else if (START_FINISH_LINE_WAS_RECOGINZED == currentEvent)
+    {
+        gCurrentState = STATE_DRIVE_TO_FINISH;
+        #ifdef COUNT_GAPS
+            gGapCount = 0U;
+        #endif
+        gEntryDone = FALSE;
+        DriveToStart_stopTimer(); /* exit */
+        gLapTimer = DriveToStart_startTimerAndBeep(); /* State drive to finish is next */
+        if (NULL == gLapTimer)
         {
+            gCurrentEvent = LAPTIMER_INIT_FAILED;
             gCurrentState = STATE_ERROR_HANDLER;
-            gEntryDone = FALSE;
-            DriveToStart_stopTimer(); /* exit */
         }
-        else if (START_FINISH_LINE_WAS_RECOGINZED == currentEvent)
-        {
-            gCurrentState = STATE_DRIVE_TO_FINISH;
-            #ifdef COUNT_GAPS
-                gGapCount = 0U;
-            #endif
-            gEntryDone = FALSE;
-            DriveToStart_stopTimer(); /* exit */
-            gLapTimer = DriveToStart_startTimerAndBeep(); /* State drive to finish is next */
-            if (NULL == gLapTimer)
-            {
-                gCurrentEvent = LAPTIMER_INIT_FAILED;
-                gCurrentState = STATE_ERROR_HANDLER;
-            }
-        }
-        else
-        {
-            /* do nothing because nothing is supposed to happen */
-        }
+    }
+    else
+    {
+        /* do nothing because nothing is supposed to happen */
+    }
 }
 
 static void handleDriveToFinishEvent(EventEnum currentEvent)
@@ -304,6 +309,11 @@ static void handleDriveOverGapEvent(EventEnum currentEvent)
         gEntryDone = FALSE;
     } 
     else if (DRIVE_OVER_GAP_IS_ACTIVE_FOR_TOO_LONG == currentEvent)
+    {
+        gCurrentState = STATE_ERROR_HANDLER;
+        gEntryDone = FALSE;
+    }
+    else if (LAPTIME_IS_TOO_LONG == currentEvent)
     {
         gCurrentState = STATE_ERROR_HANDLER;
         gEntryDone = FALSE;

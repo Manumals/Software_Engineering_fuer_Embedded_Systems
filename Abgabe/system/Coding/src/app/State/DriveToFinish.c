@@ -49,9 +49,9 @@ EventEnum DriveToFinish_followGuideLine(SoftTimer* lapTimer)
     LineSensor_read(&sensorValues, NULL);
 
     #ifdef FAST_LAP
-        if (PARAM_SETS_COUNT - 1U == SetParameters_getCurrentParamSetIdx())
+        if (PARAM_SETS_COUNT - 2U <= SetParameters_getCurrentParamSetIdx())
         {
-            return DriveHandler_driveFastLap(lapTimer->counter, &sensorValues);
+            return DriveHandler_driveFastLap(lapTimer->counter, &sensorValues, PARAM_SETS_COUNT - 1U == SetParameters_getCurrentParamSetIdx());
         }
     #endif
 

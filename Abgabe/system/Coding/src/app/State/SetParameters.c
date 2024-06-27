@@ -29,10 +29,10 @@ static UInt8 gParamSetIdx = 0U; /**< Index of the current parameter set */
 
 /** Array to store different parameter sets */
 static ParamSet gParamSetArray[PARAM_SETS_COUNT] = {
-    { 60, 20, 0},
+    { 60, 20, 0}, /* 01 conservative */
     {100, 10, 0},
     {100, 15, 0},
-    {100, 20, 0},
+    {100, 20, 0}, /* 04 fast */
     {100, 25, 0},
     {100, 30, 0},
     {100, 35, 0},
@@ -41,7 +41,8 @@ static ParamSet gParamSetArray[PARAM_SETS_COUNT] = {
     {100, 50, 0},
     {100, 55, 0},
     {100, 60, 0},
-    {100, 20, 0}
+    {100, 20, 0}, /* 13 left */
+    {100, 20, 0}  /* 14 right */
 };
 
 /* EXTERNAL FUNCTIONS *****************************************************************************/
